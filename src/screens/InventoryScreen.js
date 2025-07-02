@@ -12,6 +12,8 @@ import {
 import { Picker } from '@react-native-picker/picker';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import CustomHeader from '../components/CustomHeader';
+import { SafeAreaView } from 'react-native';
+
 
 const initialInventoryData = [
   {
@@ -19,7 +21,6 @@ const initialInventoryData = [
     name: 'Proteína Whey Gold Standard 2lb',
     category: 'Proteínas',
     stock: 25,
-    minAlert: 10,
     price: '$850.00',
     status: 'in-stock',
   },
@@ -28,7 +29,6 @@ const initialInventoryData = [
     name: 'Creatina Monohidratada 300g',
     category: 'Creatinas',
     stock: 8,
-    minAlert: 5,
     price: '$450.00',
     status: 'low-stock',
   },
@@ -37,7 +37,6 @@ const initialInventoryData = [
     name: 'C4 Pre-Entreno Explosivo',
     category: 'Pre-Entrenos',
     stock: 0,
-    minAlert: 5,
     price: '$600.00',
     status: 'out-of-stock',
   },
@@ -46,7 +45,6 @@ const initialInventoryData = [
     name: 'Shaker Prime Gym Logo',
     category: 'Accesorios',
     stock: 50,
-    minAlert: 15,
     price: '$150.00',
     status: 'in-stock',
   },
@@ -55,7 +53,6 @@ const initialInventoryData = [
     name: 'Playera Dry-Fit',
     category: 'Ropa',
     stock: 12,
-    minAlert: 5,
     price: '$300.00',
     status: 'low-stock',
   },
@@ -64,7 +61,6 @@ const initialInventoryData = [
     name: 'BCAAs Aminoácidos',
     category: 'Proteínas',
     stock: 18,
-    minAlert: 7,
     price: '$550.00',
     status: 'in-stock',
   },
@@ -105,14 +101,6 @@ const InventoryScreen = ({ navigation }) => {
     );
   };
 
-  const handleViewMovements = (productName) => {
-    Alert.alert(
-      'Movimientos de Inventario',
-      `Mostrando movimientos para: ${productName}`,
-      [{ text: 'OK' }]
-    );
-  };
-
   const handleDeleteProduct = (productName) => {
     Alert.alert(
       'Eliminar Producto',
@@ -130,7 +118,6 @@ const InventoryScreen = ({ navigation }) => {
       <Text style={styles.tableCellName}>{item.name}</Text>
       <Text style={styles.tableCell}>{item.category}</Text>
       <Text style={styles.tableCell}>{item.stock}</Text>
-      <Text style={styles.tableCell}>{item.minAlert}</Text>
       <Text style={styles.tableCell}>{item.price}</Text>
       <View style={styles.tableCell}>
         <Text style={[styles.stockStatusPill, styles[`status${item.status}`]]}>
@@ -141,9 +128,6 @@ const InventoryScreen = ({ navigation }) => {
       <View style={styles.tableCellActions}>
         <TouchableOpacity onPress={() => handleEditProduct(item.name)}>
           <MaterialCommunityIcons name="pencil-outline" size={20} color="#3498db" />
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => handleViewMovements(item.name)}>
-          <MaterialCommunityIcons name="chart-box-outline" size={20} color="#9b59b6" />
         </TouchableOpacity>
         <TouchableOpacity onPress={() => handleDeleteProduct(item.name)}>
           <MaterialCommunityIcons name="delete-outline" size={20} color="#e74c3c" />
@@ -230,7 +214,6 @@ const InventoryScreen = ({ navigation }) => {
         <Text style={styles.tableHeaderName}>Producto</Text>
         <Text style={styles.tableHeader}>Categoría</Text>
         <Text style={styles.tableHeader}>Stock</Text>
-        <Text style={styles.tableHeader}>Mínimo</Text>
         <Text style={styles.tableHeader}>Precio</Text>
         <Text style={styles.tableHeader}>Estado</Text>
         <Text style={styles.tableHeaderActions}>Acciones</Text>
@@ -239,18 +222,23 @@ const InventoryScreen = ({ navigation }) => {
   );
 
   return (
-    <View style={styles.container}>
-      <CustomHeader title="Inventario" navigation={navigation} />
-      
-      <FlatList
-        data={products}
-        renderItem={renderItem}
-        keyExtractor={(item) => item.sku}
-        ListHeaderComponent={ListHeader}
-        contentContainerStyle={styles.flatListContent}
-        stickyHeaderIndices={[0]}
-      />
-    </View>
+  <SafeAreaView style={{ flex: 1, backgroundColor: '#f0f0f0' }}>
+    <CustomHeader title="Inventario" navigation={navigation} />
+    
+    <FlatList
+      data={products}
+      renderItem={renderItem}
+      keyExtractor={(item) => item.sku}
+      ListHeaderComponent={
+        <View style={{ backgroundColor: '#f0f0f0' }}>
+          {ListHeader()}
+        </View>
+      }
+      contentContainerStyle={[styles.flatListContent, { flexGrow: 1 }]}
+      style={{ flex: 1 }}
+      keyboardShouldPersistTaps="handled"
+    />
+  </SafeAreaView>
   );
 };
 
@@ -262,6 +250,16 @@ const styles = StyleSheet.create({
   flatListContent: {
     paddingBottom: 30,
   },
+  tableRow: {
+    flexDirection: 'row',
+    borderBottomWidth: 1,
+    borderBottomColor: '#DCDCDC',
+    paddingVertical: 12,
+    paddingHorizontal: 10,
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+  },
+  
   inventoryArea: {
     padding: 20,
     backgroundColor: '#f0f0f0',
@@ -381,15 +379,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
     flex: 1.5,
     textAlign: 'left',
-  },
-  tableRow: {
-    flexDirection: 'row',
-    borderBottomWidth: 1,
-    borderBottomColor: '#DCDCDC',
-    paddingVertical: 12,
-    paddingHorizontal: 10,
-    alignItems: 'center',
-    backgroundColor: '#FFFFFF',
   },
   tableCell: {
     fontSize: 14,

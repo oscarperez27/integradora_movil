@@ -12,6 +12,7 @@ import {
   Feather,
   MaterialIcons
 } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 // Importa todas tus pantallas
 import LoginScreen from './src/screens/LoginScreen';
@@ -28,69 +29,75 @@ const Drawer = createDrawerNavigator();
 // Componente Personalizado para el Contenido del Drawer (Sidebar)
 const CustomDrawerContent = (props) => {
   const { navigation } = props;
+  const insets = useSafeAreaInsets();
 
   return (
-    <ScrollView style={styles.drawerContainer}>
-      <View style={styles.sidebarLogo}>
-        <Image source={require('./assets/Prime_Gym.jpg')} style={styles.logoImage} />
-        <Text style={styles.logoText}>Prime Gym</Text>
-      </View>
-      <View style={styles.sidebarNav}>
-        {/* Dashboard */}
-        <TouchableOpacity
-          style={styles.drawerItem}
-          onPress={() => navigation.navigate('DashboardTab')}
-        >
-          <MaterialIcons name="dashboard" size={24} color="#f0f0f0" style={styles.icon} />
-          <Text style={styles.drawerItemText}>Dashboard</Text>
-        </TouchableOpacity>
+    <View style={[
+      styles.drawerContainer,
+      { paddingTop: insets.top }
+    ]}>
+      <ScrollView style={styles.scrollView}>
+        <View style={styles.sidebarLogo}>
+          <Image source={require('./assets/Prime_Gym.jpg')} style={styles.logoImage} />
+          <Text style={styles.logoText}>Prime Gym</Text>
+        </View>
+        <View style={styles.sidebarNav}>
+          {/* Dashboard */}
+          <TouchableOpacity
+            style={styles.drawerItem}
+            onPress={() => navigation.navigate('DashboardTab')}
+          >
+            <MaterialIcons name="dashboard" size={24} color="#f0f0f0" style={styles.icon} />
+            <Text style={styles.drawerItemText}>Dashboard</Text>
+          </TouchableOpacity>
 
-        {/* Monitoreo Ambiental */}
-        <TouchableOpacity
-          style={styles.drawerItem}
-          onPress={() => navigation.navigate('MonitoringTab')}
-        >
-          <MaterialCommunityIcons name="chart-areaspline" size={24} color="#f0f0f0" style={styles.icon} />
-          <Text style={styles.drawerItemText}>Monitoreo Ambiental</Text>
-        </TouchableOpacity>
+          {/* Monitoreo Ambiental */}
+          <TouchableOpacity
+            style={styles.drawerItem}
+            onPress={() => navigation.navigate('MonitoringTab')}
+          >
+            <MaterialCommunityIcons name="chart-areaspline" size={24} color="#f0f0f0" style={styles.icon} />
+            <Text style={styles.drawerItemText}>Monitoreo Ambiental</Text>
+          </TouchableOpacity>
 
-        {/* Control de Acceso */}
-        <TouchableOpacity
-          style={styles.drawerItem}
-          onPress={() => navigation.navigate('AccessControlTab')}
-        >
-          <MaterialCommunityIcons name="fingerprint" size={24} color="#f0f0f0" style={styles.icon} />
-          <Text style={styles.drawerItemText}>Control de Acceso</Text>
-        </TouchableOpacity>
+          {/* Control de Acceso */}
+          <TouchableOpacity
+            style={styles.drawerItem}
+            onPress={() => navigation.navigate('AccessControlTab')}
+          >
+            <MaterialCommunityIcons name="fingerprint" size={24} color="#f0f0f0" style={styles.icon} />
+            <Text style={styles.drawerItemText}>Control de Acceso</Text>
+          </TouchableOpacity>
 
-        {/* Inventario */}
-        <TouchableOpacity
-          style={styles.drawerItem}
-          onPress={() => navigation.navigate('InventoryTab')}
-        >
-          <FontAwesome5 name="boxes" size={22} color="#f0f0f0" style={styles.icon} />
-          <Text style={styles.drawerItemText}>Inventario</Text>
-        </TouchableOpacity>
+          {/* Inventario */}
+          <TouchableOpacity
+            style={styles.drawerItem}
+            onPress={() => navigation.navigate('InventoryTab')}
+          >
+            <FontAwesome5 name="boxes" size={22} color="#f0f0f0" style={styles.icon} />
+            <Text style={styles.drawerItemText}>Inventario</Text>
+          </TouchableOpacity>
 
-        {/* Reportes */}
-        <TouchableOpacity
-          style={styles.drawerItem}
-          onPress={() => navigation.navigate('ReportsTab')}
-        >
-          <Feather name="file-text" size={24} color="#f0f0f0" style={styles.icon} />
-          <Text style={styles.drawerItemText}>Reportes</Text>
-        </TouchableOpacity>
+          {/* Reportes */}
+          <TouchableOpacity
+            style={styles.drawerItem}
+            onPress={() => navigation.navigate('ReportsTab')}
+          >
+            <Feather name="file-text" size={24} color="#f0f0f0" style={styles.icon} />
+            <Text style={styles.drawerItemText}>Reportes</Text>
+          </TouchableOpacity>
 
-        {/* Configuración */}
-        <TouchableOpacity
-          style={styles.drawerItem}
-          onPress={() => navigation.navigate('ConfigurationTab')}
-        >
-          <Ionicons name="settings-sharp" size={24} color="#f0f0f0" style={styles.icon} />
-          <Text style={styles.drawerItemText}>Configuración</Text>
-        </TouchableOpacity>
-      </View>
-    </ScrollView>
+          {/* Configuración */}
+          <TouchableOpacity
+            style={styles.drawerItem}
+            onPress={() => navigation.navigate('ConfigurationTab')}
+          >
+            <Ionicons name="settings-sharp" size={24} color="#f0f0f0" style={styles.icon} />
+            <Text style={styles.drawerItemText}>Configuración</Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+    </View>
   );
 };
 
@@ -191,6 +198,9 @@ const styles = StyleSheet.create({
   drawerContainer: {
     flex: 1,
     backgroundColor: '#2c3e50',
+  },
+  scrollView: {
+    flex: 1,
   },
   sidebarLogo: {
     paddingVertical: 20,

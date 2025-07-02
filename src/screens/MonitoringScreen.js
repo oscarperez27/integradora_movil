@@ -1,6 +1,6 @@
 // src/screens/MonitoringScreen.js
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, Alert, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Alert, Dimensions, SafeAreaView } from 'react-native';
 import ZoneCard from '../components/ZoneCard';
 import CustomHeader from '../components/CustomHeader';
 
@@ -64,7 +64,7 @@ const MonitoringScreen = ({ navigation }) => {
   };
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <CustomHeader title="Monitoreo Ambiental" navigation={navigation} />
       
       <ScrollView 
@@ -101,7 +101,7 @@ const MonitoringScreen = ({ navigation }) => {
           </View>
         </View>
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 };
 

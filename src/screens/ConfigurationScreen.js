@@ -13,6 +13,7 @@ import {
 } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import CustomHeader from '../components/CustomHeader';
+import { SafeAreaView } from 'react-native';
 
 const initialSensorsData = [
   {
@@ -139,7 +140,7 @@ const ConfigurationScreen = ({ navigation }) => {
   };
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <CustomHeader title="Configuración" navigation={navigation} />
       
       <ScrollView 
@@ -319,79 +320,86 @@ const ConfigurationScreen = ({ navigation }) => {
 
           {/* Notificaciones */}
           <View style={styles.settingsCard}>
-            <Text style={styles.cardTitle}>Preferencias de Notificación</Text>
-            <Text style={styles.cardDescription}>
-              Configure cómo desea recibir las alertas del sistema
-            </Text>
-            
-            <View style={styles.notificationGroup}>
-              <Text style={styles.notificationTitle}>Alertas Ambientales</Text>
-              <View style={styles.switchContainer}>
-                <Switch
-                  value={notifyEnvEmail}
-                  onValueChange={setNotifyEnvEmail}
-                  trackColor={{ false: '#767577', true: '#D90429' }}
-                  thumbColor="#FFFFFF"
-                />
-                <Text style={styles.switchLabel}>Notificaciones por Email</Text>
-              </View>
-              <View style={styles.switchContainer}>
-                <Switch
-                  value={notifyEnvPlatform}
-                  onValueChange={setNotifyEnvPlatform}
-                  trackColor={{ false: '#767577', true: '#D90429' }}
-                  thumbColor="#FFFFFF"
-                />
-                <Text style={styles.switchLabel}>Alertas en Plataforma</Text>
-              </View>
-            </View>
-            
-            <View style={styles.notificationGroup}>
-              <Text style={styles.notificationTitle}>Alertas de Inventario</Text>
-              <View style={styles.switchContainer}>
-                <Switch
-                  value={notifyStockEmail}
-                  onValueChange={setNotifyStockEmail}
-                  trackColor={{ false: '#767577', true: '#D90429' }}
-                  thumbColor="#FFFFFF"
-                />
-                <Text style={styles.switchLabel}>Notificaciones por Email</Text>
-              </View>
-              <View style={styles.switchContainer}>
-                <Switch
-                  value={notifyStockPlatform}
-                  onValueChange={setNotifyStockPlatform}
-                  trackColor={{ false: '#767577', true: '#D90429' }}
-                  thumbColor="#FFFFFF"
-                />
-                <Text style={styles.switchLabel}>Alertas en Plataforma</Text>
-              </View>
-            </View>
-            
-            <View style={styles.notificationGroup}>
-              <Text style={styles.notificationTitle}>Alertas de Sensores</Text>
-              <View style={styles.switchContainer}>
-                <Switch
-                  value={notifySensorEmail}
-                  onValueChange={setNotifySensorEmail}
-                  trackColor={{ false: '#767577', true: '#D90429' }}
-                  thumbColor="#FFFFFF"
-                />
-                <Text style={styles.switchLabel}>Notificaciones por Email</Text>
-              </View>
-            </View>
-            
-            <TouchableOpacity 
-              style={styles.primaryButton} 
-              onPress={handleSaveNotificationPreferences}
-            >
-              <MaterialCommunityIcons name="content-save" size={20} color="white" />
-              <Text style={styles.buttonText}>Guardar Preferencias</Text>
-            </TouchableOpacity>
-          </View>
+  <Text style={styles.cardTitle}>Preferencias de Notificación</Text>
+  <Text style={styles.cardDescription}>
+    Configure cómo desea recibir las alertas del sistema
+  </Text>
+  
+  {/* Lista con puntitos */}
+  <View style={styles.notificationList}>
+    <Text style={styles.notificationTitle}>Alertas Ambientales</Text>
+    
+    <TouchableOpacity 
+      style={styles.notificationItem}
+      onPress={() => setNotifyEnvEmail(!notifyEnvEmail)}
+    >
+      <View style={[
+        styles.dot, 
+        notifyEnvEmail ? styles.activeDot : styles.inactiveDot
+      ]} />
+      <Text style={styles.notificationText}>Notificaciones por Email</Text>
+    </TouchableOpacity>
+    
+    <TouchableOpacity 
+      style={styles.notificationItem}
+      onPress={() => setNotifyEnvPlatform(!notifyEnvPlatform)}
+    >
+      <View style={[
+        styles.dot, 
+        notifyEnvPlatform ? styles.activeDot : styles.inactiveDot
+      ]} />
+      <Text style={styles.notificationText}>Alertas en Plataforma</Text>
+    </TouchableOpacity>
+    
+    <Text style={styles.notificationTitle}>Alertas de Inventario</Text>
+    
+    <TouchableOpacity 
+      style={styles.notificationItem}
+      onPress={() => setNotifyStockEmail(!notifyStockEmail)}
+    >
+      <View style={[
+        styles.dot, 
+        notifyStockEmail ? styles.activeDot : styles.inactiveDot
+      ]} />
+      <Text style={styles.notificationText}>Notificaciones por Email</Text>
+    </TouchableOpacity>
+    
+    <TouchableOpacity 
+      style={styles.notificationItem}
+      onPress={() => setNotifyStockPlatform(!notifyStockPlatform)}
+    >
+      <View style={[
+        styles.dot, 
+        notifyStockPlatform ? styles.activeDot : styles.inactiveDot
+      ]} />
+      <Text style={styles.notificationText}>Alertas en Plataforma</Text>
+    </TouchableOpacity>
+    
+    <Text style={styles.notificationTitle}>Alertas de Sensores</Text>
+    
+    <TouchableOpacity 
+      style={styles.notificationItem}
+      onPress={() => setNotifySensorEmail(!notifySensorEmail)}
+    >
+      <View style={[
+        styles.dot, 
+        notifySensorEmail ? styles.activeDot : styles.inactiveDot
+      ]} />
+      <Text style={styles.notificationText}>Notificaciones por Email</Text>
+    </TouchableOpacity>
+  </View>
+  
+  <TouchableOpacity 
+    style={styles.primaryButton} 
+    onPress={handleSaveNotificationPreferences}
+  >
+    <MaterialCommunityIcons name="content-save" size={20} color="white" />
+    <Text style={styles.buttonText}>Guardar Preferencias</Text>
+  </TouchableOpacity>
+</View>
         </View>
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 };
 
@@ -566,14 +574,40 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-around',
   },
+  notificationList: {
+  marginBottom: 15,
+  },
+  notificationItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 10,
+    marginBottom: 5,
+  },
+  dot: {
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    marginRight: 12,
+  },
+  activeDot: {
+    backgroundColor: '#D90429',
+  },
+  inactiveDot: {
+    backgroundColor: '#DCDCDC',
+  },
+  notificationText: {
+    fontSize: 15,
+    color: '#4A4A4A',
+  },
   notificationGroup: {
     marginBottom: 20,
   },
   notificationTitle: {
     fontSize: 16,
-    fontWeight: '500',
-    color: '#1A1A1A',
-    marginBottom: 10,
+    fontWeight: '600',
+    color: '#2c3e50',
+    marginTop: 15,
+    marginBottom: 8,
   },
   switchContainer: {
     flexDirection: 'row',

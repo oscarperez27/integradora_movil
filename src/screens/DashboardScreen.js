@@ -1,6 +1,6 @@
 // src/screens/DashboardScreen.js
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, SafeAreaView } from 'react-native';
 import WidgetCard from '../components/WidgetCard';
 import CustomHeader from '../components/CustomHeader';
 
@@ -36,7 +36,7 @@ const DashboardScreen = ({ navigation }) => {
   }, []);
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <CustomHeader title="Panel de Control" navigation={navigation} />
       
       <ScrollView style={styles.scrollViewContent}>
@@ -120,7 +120,7 @@ const DashboardScreen = ({ navigation }) => {
           </View>
         </View>
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 };
 

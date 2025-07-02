@@ -11,12 +11,13 @@ import {
 import { Picker } from '@react-native-picker/picker';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import CustomHeader from '../components/CustomHeader';
+import { SafeAreaView } from 'react-native';
 
 const reportTypes = [
   { id: 'gym_usage', title: 'Uso del Gimnasio', description: 'Afluencia, horas pico, uso de zonas.' },
   { id: 'supp_consumption', title: 'Consumo de Suplementos', description: 'Ventas, tendencias, productos populares.' },
   { id: 'env_performance', title: 'Rendimiento Ambiental', description: 'Cumplimiento de rangos T°/Humedad.' },
-  { id: 'energy_consumption', title: 'Consumo Energético', description: 'Detalle de uso, comparativas.' },
+  //{ id: 'energy_consumption', title: 'Consumo Energético', description: 'Detalle de uso, comparativas.' },
   { id: 'access_activity', title: 'Actividad de Accesos', description: 'Registros detallados, permitidos/denegados.' },
   { id: 'general_report', title: 'Reporte General', description: 'Resumen consolidado de operaciones.' },
 ];
@@ -116,7 +117,7 @@ const ReportsScreen = ({ navigation }) => {
   };
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <CustomHeader title="Reportes" navigation={navigation} />
       
       <ScrollView style={styles.scrollViewContent}>
@@ -203,7 +204,7 @@ const ReportsScreen = ({ navigation }) => {
           </View>
         </View>
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 };
 

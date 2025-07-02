@@ -14,6 +14,7 @@ import {
 import { Picker } from '@react-native-picker/picker';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import CustomHeader from '../components/CustomHeader';
+import { SafeAreaView } from 'react-native';
 
 const initialCurrentlyInsideData = [
   {
@@ -144,6 +145,28 @@ const AccessControlScreen = ({ navigation }) => {
     );
   };
 
+  const handleEditMember = (memberName) => {
+      Alert.alert(
+        'Editar Perfil',
+        `¿Desea editar el perfil ${memberName}?`,
+        [
+          { text: 'Cancelar', style: 'cancel' },
+          { text: 'Editar', onPress: () => console.log('Editar perfil') }
+        ]
+      );
+    };
+  
+    const handleDeleteMember = (memberName) => {
+      Alert.alert(
+        'Eliminar Perfil',
+        `¿Está seguro de eliminar ${memberName}?`,
+        [
+          { text: 'Cancelar', style: 'cancel' },
+          { text: 'Eliminar', style: 'destructive', onPress: () => console.log('Eliminar producto') }
+        ]
+      );
+    };
+
   const renderHistoryItem = ({ item }) => (
     <View style={styles.tableRow}>
       <Text style={styles.tableCellFlex1}>{item.date}</Text>
@@ -214,8 +237,11 @@ const AccessControlScreen = ({ navigation }) => {
             <Text style={styles.tableCellFlex1}>{item.entryTime}</Text>
             <Text style={styles.tableCellFlex1}>{item.membershipType}</Text>
             <View style={styles.tableCellActions}>
-              <TouchableOpacity onPress={() => Alert.alert('Registrar Salida', `Registrar salida para ${item.name}`)}>
-                <MaterialCommunityIcons name="exit-run" size={20} color="#e74c3c" />
+              <TouchableOpacity onPress={() => handleEditMember(item.name)}>
+                <MaterialCommunityIcons name="pencil-outline" size={20} color="#3498db" />
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => handleDeleteMember(item.name)}>
+                <MaterialCommunityIcons name="delete-outline" size={20} color="#e74c3c" />
               </TouchableOpacity>
             </View>
           </View>
@@ -309,19 +335,20 @@ const AccessControlScreen = ({ navigation }) => {
   );
 
   return (
-    <View style={styles.container}>
-      <CustomHeader title="Control de Acceso" navigation={navigation} />
-      
-      <FlatList
-        data={accessHistoryDisplay}
-        renderItem={renderHistoryItem}
-        keyExtractor={(item) => item.id}
-        ListHeaderComponent={ListHeader}
-        contentContainerStyle={styles.flatListContent}
-        stickyHeaderIndices={[0]}
-      />
-    </View>
-  );
+  <SafeAreaView style={styles.container}>
+    <CustomHeader title="Control de Acceso" navigation={navigation} />
+    
+    <FlatList
+      data={accessHistoryDisplay}
+      renderItem={renderHistoryItem}
+      keyExtractor={(item) => item.id}
+      ListHeaderComponent={ListHeader}
+      contentContainerStyle={styles.flatListContent}
+      style={styles.flatList}
+      ListFooterComponent={<View style={{ height: 20 }} />} // Espacio adicional al final
+    />
+  </SafeAreaView>
+);
 };
 
 const styles = StyleSheet.create({
@@ -329,8 +356,13 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f0f0f0',
   },
+  flatList: {
+    flex: 1,
+    width: '100%',
+  },
   flatListContent: {
     paddingBottom: 30,
+    flexGrow: 1,
   },
   accessControlArea: {
     padding: 20,
