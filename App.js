@@ -22,6 +22,7 @@ import AccessControlScreen from './src/screens/AccessControlScreen';
 import InventoryScreen from './src/screens/InventoryScreen';
 import ReportsScreen from './src/screens/ReportsScreen';
 import ConfigurationScreen from './src/screens/ConfigurationScreen';
+import AdminProfileScreen from './src/screens/AdminProfileScreen';
 
 const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
@@ -184,9 +185,12 @@ export default function App() {
           options={{ headerShown: false }}
         />
         <Stack.Screen
-          name="MainApp"
+          name="App Principal"
           component={DrawerNavigator}
           options={{ headerShown: false }}
+        />
+        <Stack.Screen name="Perfil" 
+        component={AdminProfileScreen} 
         />
       </Stack.Navigator>
     </NavigationContainer>

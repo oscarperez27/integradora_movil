@@ -1,13 +1,19 @@
 // src/screens/MonitoringScreen.js
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, Alert, Dimensions, SafeAreaView } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  Alert,
+  Dimensions,
+  SafeAreaView,
+} from 'react-native';
 import ZoneCard from '../components/ZoneCard';
 import CustomHeader from '../components/CustomHeader';
 
-// Obtener dimensiones de la pantalla para calcular anchos responsivos
 const { width } = Dimensions.get('window');
 
-// Datos simulados para tarjetas de zona
 const initialZoneData = [
   {
     id: '1',
@@ -33,14 +39,6 @@ const initialZoneData = [
     humidity: 75,
     lastUpdated: 'Hace 1 min',
   },
-  {
-    id: '4',
-    zoneName: 'Recepción',
-    status: 'Sensor Offline',
-    temp: '--',
-    humidity: '--',
-    lastUpdated: 'Última conexión: Hace 2 horas',
-  },
 ];
 
 const MonitoringScreen = ({ navigation }) => {
@@ -51,6 +49,7 @@ const MonitoringScreen = ({ navigation }) => {
   useEffect(() => {
     const interval = setInterval(() => {
       console.log('Actualizando datos de monitoreo...');
+      // Aquí puedes integrar una futura llamada a sensores reales
     }, 60000);
     return () => clearInterval(interval);
   }, []);
@@ -66,8 +65,8 @@ const MonitoringScreen = ({ navigation }) => {
   return (
     <SafeAreaView style={styles.container}>
       <CustomHeader title="Monitoreo Ambiental" navigation={navigation} />
-      
-      <ScrollView 
+
+      <ScrollView
         style={styles.scrollViewContent}
         contentContainerStyle={styles.scrollContentContainer}
       >
@@ -144,10 +143,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#4A4A4A',
   },
-  overviewValue: {
-    fontSize: 16,
-    fontWeight: '500',
-  },
   sensorsOk: {
     color: '#2e7d32',
     fontWeight: 'bold',
@@ -164,9 +159,9 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   cardItem: {
-    width: width > 500 ? '48%' : '100%', // Responsivo para tablets y móviles
+    width: width > 500 ? '48%' : '100%',
     marginBottom: 15,
-    aspectRatio: 1.5, // Mantener relación de aspecto consistente
+    aspectRatio: 1.5,
   },
 });
 

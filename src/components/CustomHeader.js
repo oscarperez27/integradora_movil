@@ -1,92 +1,100 @@
 // src/components/CustomHeader.js
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native'; // Asegúrate de importar Alert
+import React, { useState } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Alert,
+  Modal
+} from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
-// ELIMINA ESTA LÍNEA: import { useAuth } from '../context/AuthContext';
 
 const CustomHeader = ({
   title,
   navigation,
   showBackButton = false,
   showMenuButton = true,
-  showUserInfo = true, // Mantendremos esta prop, pero el contenido se simulará
+  showUserInfo = true,
   rightContent,
   headerStyle,
   titleStyle
 }) => {
-  // ELIMINA ESTAS LÍNEAS RELACIONADAS CON useAuth:
-  // const { user, logout } = useAuth(); // Obtener información del usuario desde el contexto
+  const [menuVisible, setMenuVisible] = useState(false);
+  const user = { name: 'Usuario Admin' };
 
   const handleBack = () => {
     navigation.goBack();
   };
 
-  // REEMPLAZA handleLogout CON UNA FUNCIÓN SIMULADA O ELIMÍNALA TEMPORALMENTE
-  // Si showUserInfo es true, necesitarás un handleLogout para el botón
-  const handleLogout = () => {
+  
+  const handleUserMenu = () => {
     Alert.alert(
       'Cerrar Sesión',
       '¿Estás seguro de que deseas cerrar sesión?',
       [
         { text: 'Cancelar', style: 'cancel' },
-        {
-          text: 'Cerrar Sesión',
-          onPress: () => navigation.replace('Login') // Por ahora, solo regresa al login
-        }
-      ]
+        { text: 'Cerrar Sesión', onPress: () => navigation.replace('Login'), style: 'destructive' },
+      ],
+      { cancelable: true }
     );
   };
 
-  // Simula un usuario por ahora para que el UI se vea:
-  const user = { name: 'Usuario Admin' }; // Simulación de usuario
+  const handleGoToProfile = () => {
+    setMenuVisible(false);
+    navigation.navigate('Perfil');
+  };
 
   return (
     <View style={[styles.header, headerStyle]}>
-      {/* Botón izquierdo (menú o retroceso) */}
       <View style={styles.leftContainer}>
         {showBackButton ? (
-          <TouchableOpacity
-            style={styles.iconButton}
-            onPress={handleBack}
-            activeOpacity={0.7}
-          >
+          <TouchableOpacity style={styles.iconButton} onPress={handleBack}>
             <MaterialIcons name="arrow-back" size={24} color="#1A1A1A" />
           </TouchableOpacity>
         ) : showMenuButton ? (
-          <TouchableOpacity
-            style={styles.iconButton}
-            onPress={() => navigation.openDrawer()}
-            activeOpacity={0.7}
-          >
+          <TouchableOpacity style={styles.iconButton} onPress={() => navigation.openDrawer()}>
             <MaterialIcons name="menu" size={24} color="#1A1A1A" />
           </TouchableOpacity>
         ) : null}
       </View>
 
-      {/* Título central */}
       <View style={styles.titleContainer}>
         <Text style={[styles.headerTitle, titleStyle]} numberOfLines={1}>
           {title}
         </Text>
       </View>
 
-      {/* Contenido derecho (info usuario o contenido personalizado) */}
       <View style={styles.rightContainer}>
         {rightContent ? (
           rightContent
         ) : showUserInfo ? (
-          <TouchableOpacity
-            style={styles.userContainer}
-            onPress={handleLogout} // Usa la función simulada
-            activeOpacity={0.7}
-          >
-            <View style={styles.userInitialsCircle}>
-              <Text style={styles.userInitials}>
-                {/* Simula las iniciales del usuario */}
-                {user?.name?.split(' ').map(n => n[0]).join('').toUpperCase()}
-              </Text>
-            </View>
-          </TouchableOpacity>
+          <>
+            <TouchableOpacity style={styles.userContainer} onPress={() => setMenuVisible(true)}>
+              <View style={styles.userInitialsCircle}>
+                <Text style={styles.userInitials}>
+                  {user?.name?.split(' ').map(n => n[0]).join('').toUpperCase()}
+                </Text>
+              </View>
+            </TouchableOpacity>
+
+            <Modal transparent={true} visible={menuVisible} animationType="fade">
+              <TouchableOpacity
+                style={styles.modalOverlay}
+                activeOpacity={1}
+                onPressOut={() => setMenuVisible(false)}
+              >
+                <View style={styles.menu}>
+                  <TouchableOpacity style={styles.menuItem} onPress={handleGoToProfile}>
+                    <Text style={styles.menuText}>Perfil de administrador</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity style={styles.menuItem} onPress={handleUserMenu}>
+                    <Text style={styles.menuText}>Cerrar sesión</Text>
+                  </TouchableOpacity>
+                </View>
+              </TouchableOpacity>
+            </Modal>
+          </>
         ) : null}
       </View>
     </View>
@@ -149,13 +157,33 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 14,
   },
-  // ELIMINA O COMENTA ESTE ESTILO, YA NO ES NECESARIO CON LA SIMULACIÓN:
-  // userName: {
-  //   marginRight: 8,
-  //   fontSize: 14,
-  //   color: '#4A4A4A',
-  //   maxWidth: 120,
-  // },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: 'flex-start',
+    alignItems: 'flex-end',
+    paddingTop: 60,
+    paddingRight: 15,
+    backgroundColor: 'rgba(0,0,0,0.1)',
+  },
+  menu: {
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    paddingVertical: 10,
+    width: 200,
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOpacity: 0.2,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 5,
+  },
+  menuItem: {
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+  },
+  menuText: {
+    fontSize: 16,
+    color: '#1A1A1A',
+  },
 });
 
 export default CustomHeader;

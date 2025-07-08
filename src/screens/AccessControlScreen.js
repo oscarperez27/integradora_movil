@@ -1,194 +1,60 @@
 // src/screens/AccessControlScreen.js
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-  TextInput,
   Image,
-  FlatList,
-  Alert
+  Alert,
+  SafeAreaView,
 } from 'react-native';
-import { Picker } from '@react-native-picker/picker';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import CustomHeader from '../components/CustomHeader';
-import { SafeAreaView } from 'react-native';
 
 const initialCurrentlyInsideData = [
   {
     id: 'in1',
     photo: require('../../assets/yooo.jpg'),
     name: 'Ana López',
-    entryTime: '08:15 AM',
     membershipType: 'Premium',
   },
   {
     id: 'in2',
     photo: require('../../assets/yooo.jpg'),
     name: 'Carlos Martínez',
-    entryTime: '08:32 AM',
     membershipType: 'Básica',
   },
   {
     id: 'in3',
     photo: require('../../assets/yooo.jpg'),
     name: 'Laura Fernández',
-    entryTime: '09:01 AM',
     membershipType: 'Estudiante',
-  },
-];
-
-const initialExitRegisterData = [
-  {
-    id: 'out1',
-    photo: require('../../assets/yooo.jpg'),
-    name: 'Juan Pérez',
-    exitTime: '10:30 AM',
-    timeInGym: '2h 15min',
-  },
-  {
-    id: 'out2',
-    photo: require('../../assets/yooo.jpg'),
-    name: 'María González',
-    exitTime: '11:45 AM',
-    timeInGym: '1h 30min',
-  },
-  {
-    id: 'out3',
-    photo: require('../../assets/yooo.jpg'),
-    name: 'Pedro Sánchez',
-    exitTime: '12:20 PM',
-    timeInGym: '3h 05min',
-  },
-];
-
-const initialAccessHistoryData = [
-  {
-    id: 'h1',
-    date: '2025-05-31',
-    entryTime: '07:30 AM',
-    exitTime: '08:45 AM',
-    memberName: 'Roberto Pérez',
-    method: 'Check-in',
-    status: 'allowed',
-  },
-  {
-    id: 'h2',
-    date: '2025-05-31',
-    entryTime: '07:35 AM',
-    exitTime: '-',
-    memberName: 'Visitante',
-    method: 'Check-in',
-    status: 'denied',
-  },
-  {
-    id: 'h3',
-    date: '2025-05-30',
-    entryTime: '18:05 PM',
-    exitTime: '19:30 PM',
-    memberName: 'Sofía Gómez',
-    method: 'Check-in',
-    status: 'allowed',
   },
 ];
 
 const AccessControlScreen = ({ navigation }) => {
   const [currentlyInside] = useState(initialCurrentlyInsideData);
-  const [exitRegister] = useState(initialExitRegisterData);
-  const [accessHistoryDisplay, setAccessHistoryDisplay] = useState(initialAccessHistoryData);
+  const currentPeopleCount = currentlyInside.length;
 
-  const [filterStartDate, setFilterStartDate] = useState('');
-  const [filterEndDate, setFilterEndDate] = useState('');
-  const [filterMember, setFilterMember] = useState('');
-  const [filterStatus, setFilterStatus] = useState('');
-
-  const currentPeopleCount = initialCurrentlyInsideData.length;
-  const accessesTodayCount = initialAccessHistoryData.filter(item => item.status === 'allowed').length;
-  const exitsTodayCount = initialExitRegisterData.length;
-
-  useEffect(() => {
-    const filteredHistory = initialAccessHistoryData.filter(record => {
-      const matchesMember = record.memberName.toLowerCase().includes(filterMember.toLowerCase());
-      const matchesStatus = filterStatus === '' || record.status === filterStatus;
-
-      const recordDate = new Date(record.date);
-      const start = filterStartDate ? new Date(filterStartDate) : null;
-      const end = filterEndDate ? new Date(filterEndDate) : null;
-
-      const matchesStartDate = !start || recordDate >= start;
-      const matchesEndDate = !end || recordDate <= end;
-
-      return matchesMember && matchesStatus && matchesStartDate && matchesEndDate;
-    });
-
-    setAccessHistoryDisplay(filteredHistory);
-  }, [filterStartDate, filterEndDate, filterMember, filterStatus]);
-
-  const handleDetailsPress = (memberName) => {
-    Alert.alert(
-      'Detalles de Acceso',
-      `Mostrando detalles para: ${memberName}`,
-      [{ text: 'OK' }]
-    );
+  const handleEditMember = (name) => {
+    Alert.alert('Editar Perfil', `¿Desea editar el perfil de ${name}?`, [
+      { text: 'Cancelar', style: 'cancel' },
+      { text: 'Editar', onPress: () => console.log('Editar perfil') },
+    ]);
   };
 
-  const handleEditPress = (memberName) => {
-    Alert.alert(
-      'Editar Registro',
-      `¿Desea editar el registro de ${memberName}?`,
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        { text: 'Confirmar', onPress: () => console.log('Editar registro') }
-      ]
-    );
+  const handleDeleteMember = (name) => {
+    Alert.alert('Eliminar Perfil', `¿Está seguro de eliminar a ${name}?`, [
+      { text: 'Cancelar', style: 'cancel' },
+      {
+        text: 'Eliminar',
+        style: 'destructive',
+        onPress: () => console.log('Eliminar miembro'),
+      },
+    ]);
   };
-
-  const handleEditMember = (memberName) => {
-      Alert.alert(
-        'Editar Perfil',
-        `¿Desea editar el perfil ${memberName}?`,
-        [
-          { text: 'Cancelar', style: 'cancel' },
-          { text: 'Editar', onPress: () => console.log('Editar perfil') }
-        ]
-      );
-    };
-  
-    const handleDeleteMember = (memberName) => {
-      Alert.alert(
-        'Eliminar Perfil',
-        `¿Está seguro de eliminar ${memberName}?`,
-        [
-          { text: 'Cancelar', style: 'cancel' },
-          { text: 'Eliminar', style: 'destructive', onPress: () => console.log('Eliminar producto') }
-        ]
-      );
-    };
-
-  const renderHistoryItem = ({ item }) => (
-    <View style={styles.tableRow}>
-      <Text style={styles.tableCellFlex1}>{item.date}</Text>
-      <Text style={styles.tableCellFlex1}>{item.entryTime}</Text>
-      <Text style={styles.tableCellFlex1}>{item.exitTime}</Text>
-      <Text style={styles.tableCellFlex2}>{item.memberName}</Text>
-      <Text style={styles.tableCellFlex1}>{item.method}</Text>
-      <View style={styles.tableCellFlex1}>
-        <Text style={[styles.statusPill, styles[`status${item.status}`]]}>
-          {item.status === 'allowed' ? 'Permitido' : 'Denegado'}
-        </Text>
-      </View>
-      <View style={styles.tableCellActions}>
-        <TouchableOpacity onPress={() => handleDetailsPress(item.memberName)}>
-          <MaterialCommunityIcons name="eye-outline" size={20} color="#3498db" />
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => handleEditPress(item.memberName)}>
-          <MaterialCommunityIcons name="pencil-outline" size={20} color="#f39c12" />
-        </TouchableOpacity>
-      </View>
-    </View>
-  );
 
   const ListHeader = () => (
     <View style={styles.accessControlArea}>
@@ -199,44 +65,50 @@ const AccessControlScreen = ({ navigation }) => {
           <Text style={styles.statValue}>{currentPeopleCount}</Text>
           <Text style={styles.statLabel}>Personas Actualmente Dentro</Text>
         </View>
-        <View style={styles.statCard}>
-          <Text style={styles.statValue}>{accessesTodayCount}</Text>
-          <Text style={styles.statLabel}>Accesos del Día</Text>
-        </View>
-        <View style={styles.statCard}>
-          <Text style={styles.statValue}>{exitsTodayCount}</Text>
-          <Text style={styles.statLabel}>Salidas del Día</Text>
-        </View>
       </View>
 
-      <Text style={styles.sectionSubtitle}>Registro de Entrada</Text>
+      <Text style={styles.sectionSubtitle}>Registro de Usuarios</Text>
       <View style={styles.addMemberBox}>
         <Text style={styles.addMemberBoxTitle}>Miembros</Text>
-        <TouchableOpacity 
-          style={styles.btnAdd} 
-          onPress={() => Alert.alert('Agregar Miembro', 'Funcionalidad para agregar nuevo miembro')}
+        <TouchableOpacity
+          style={styles.btnAdd}
+          onPress={() =>
+            Alert.alert('Agregar Miembro', 'Funcionalidad para agregar nuevo miembro')
+          }
         >
           <MaterialCommunityIcons name="account-plus" size={20} color="white" />
           <Text style={styles.btnAddText}>Nuevo Miembro</Text>
         </TouchableOpacity>
       </View>
-      
+
       <View style={styles.tableContainer}>
         <View style={styles.tableHeaderRow}>
-          <Text style={styles.tableHeaderPhoto}>Foto</Text>
-          <Text style={styles.tableHeaderNameLarge}>Nombre</Text>
-          <Text style={styles.tableHeaderFlex1}>Entrada</Text>
-          <Text style={styles.tableHeaderFlex1}>Membresía</Text>
-          <Text style={styles.tableHeaderActions}>Acciones</Text>
+          <View style={styles.cellPhoto}>
+            <Text style={styles.tableHeader}>Foto</Text>
+          </View>
+          <View style={styles.cellName}>
+            <Text style={styles.tableHeader}>Nombre</Text>
+          </View>
+          <View style={styles.cellMembership}>
+            <Text style={styles.tableHeader}>Membresía</Text>
+          </View>
+          <View style={styles.cellActions}>
+            <Text style={styles.tableHeader}>Acciones</Text>
+          </View>
         </View>
-        
+
         {currentlyInside.map((item) => (
           <View key={item.id} style={styles.tableRow}>
-            <Image source={item.photo} style={styles.memberPhotoSm} />
-            <Text style={styles.tableCellNameLarge}>{item.name}</Text>
-            <Text style={styles.tableCellFlex1}>{item.entryTime}</Text>
-            <Text style={styles.tableCellFlex1}>{item.membershipType}</Text>
-            <View style={styles.tableCellActions}>
+            <View style={styles.cellPhoto}>
+              <Image source={item.photo} style={styles.memberPhotoSm} />
+            </View>
+            <View style={styles.cellName}>
+              <Text style={styles.tableCell}>{item.name}</Text>
+            </View>
+            <View style={styles.cellMembership}>
+              <Text style={styles.tableCell}>{item.membershipType}</Text>
+            </View>
+            <View style={styles.cellActions}>
               <TouchableOpacity onPress={() => handleEditMember(item.name)}>
                 <MaterialCommunityIcons name="pencil-outline" size={20} color="#3498db" />
               </TouchableOpacity>
@@ -247,118 +119,23 @@ const AccessControlScreen = ({ navigation }) => {
           </View>
         ))}
       </View>
-
-      <Text style={styles.sectionSubtitle}>Registro de Salida</Text>
-      <View style={styles.addMemberBox}>
-        <Text style={styles.addMemberBoxTitle}>Registrar salida</Text>
-        <TouchableOpacity 
-          style={styles.btnAdd} 
-          onPress={() => Alert.alert('Registrar Salida', 'Funcionalidad para registrar salida')}
-        >
-          <MaterialCommunityIcons name="logout" size={20} color="white" />
-          <Text style={styles.btnAddText}>Registrar</Text>
-        </TouchableOpacity>
-      </View>
-      
-      <View style={styles.tableContainer}>
-        <View style={styles.tableHeaderRow}>
-          <Text style={styles.tableHeaderPhoto}>Foto</Text>
-          <Text style={styles.tableHeaderNameLarge}>Nombre</Text>
-          <Text style={styles.tableHeaderFlex1}>Salida</Text>
-          <Text style={styles.tableHeaderFlex1}>Tiempo</Text>
-        </View>
-        
-        {exitRegister.map((item) => (
-          <View key={item.id} style={styles.tableRow}>
-            <Image source={item.photo} style={styles.memberPhotoSm} />
-            <Text style={styles.tableCellNameLarge}>{item.name}</Text>
-            <Text style={styles.tableCellFlex1}>{item.exitTime}</Text>
-            <Text style={styles.tableCellFlex1}>{item.timeInGym}</Text>
-          </View>
-        ))}
-      </View>
-
-      <Text style={styles.sectionSubtitle}>Histórico de Accesos</Text>
-      <View style={styles.filtersBar}>
-        <View style={styles.formGroup}>
-          <Text style={styles.label}>Desde:</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="AAAA-MM-DD"
-            value={filterStartDate}
-            onChangeText={setFilterStartDate}
-          />
-        </View>
-        <View style={styles.formGroup}>
-          <Text style={styles.label}>Hasta:</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="AAAA-MM-DD"
-            value={filterEndDate}
-            onChangeText={setFilterEndDate}
-          />
-        </View>
-        <View style={styles.formGroup}>
-          <Text style={styles.label}>Miembro:</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Nombre o ID"
-            value={filterMember}
-            onChangeText={setFilterMember}
-          />
-        </View>
-        <View style={styles.formGroup}>
-          <Text style={styles.label}>Estado:</Text>
-          <Picker
-            selectedValue={filterStatus}
-            onValueChange={(itemValue) => setFilterStatus(itemValue)}
-            style={styles.picker}
-            dropdownIconColor="#7f8c8d"
-          >
-            <Picker.Item label="Todos" value="" />
-            <Picker.Item label="Permitido" value="allowed" />
-            <Picker.Item label="Denegado" value="denied" />
-          </Picker>
-        </View>
-      </View>
-
-      <View style={styles.tableHeaderRow}>
-        <Text style={styles.tableHeaderFlex1}>Fecha</Text>
-        <Text style={styles.tableHeaderFlex1}>Entrada</Text>
-        <Text style={styles.tableHeaderFlex1}>Salida</Text>
-        <Text style={styles.tableHeaderFlex2}>Miembro</Text>
-        <Text style={styles.tableHeaderFlex1}>Método</Text>
-        <Text style={styles.tableHeaderFlex1}>Estado</Text>
-        <Text style={styles.tableHeaderActions}>Acciones</Text>
-      </View>
     </View>
   );
 
   return (
-  <SafeAreaView style={styles.container}>
-    <CustomHeader title="Control de Acceso" navigation={navigation} />
-    
-    <FlatList
-      data={accessHistoryDisplay}
-      renderItem={renderHistoryItem}
-      keyExtractor={(item) => item.id}
-      ListHeaderComponent={ListHeader}
-      contentContainerStyle={styles.flatListContent}
-      style={styles.flatList}
-      ListFooterComponent={<View style={{ height: 20 }} />} // Espacio adicional al final
-    />
-  </SafeAreaView>
-);
+    <SafeAreaView style={styles.container}>
+      <CustomHeader title="Control de Acceso" navigation={navigation} />
+      <ScrollView contentContainerStyle={styles.flatListContent}>
+        <ListHeader />
+      </ScrollView>
+    </SafeAreaView>
+  );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f0f0f0',
-  },
-  flatList: {
-    flex: 1,
-    width: '100%',
   },
   flatListContent: {
     paddingBottom: 30,
@@ -452,6 +229,20 @@ const styles = StyleSheet.create({
     shadowRadius: 10,
     elevation: 3,
   },
+  tableHeader: {
+    fontWeight: '600',
+    color: '#1A1A1A',
+    fontSize: 12,
+    textAlign: 'center',
+  },
+  tableRow: {
+    flexDirection: 'row',
+    borderBottomWidth: 1,
+    borderBottomColor: '#DCDCDC',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    paddingVertical: 10,
+  },
   tableHeaderRow: {
     flexDirection: 'row',
     backgroundColor: '#f8f9fa',
@@ -460,121 +251,43 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 10,
   },
-  tableHeader: {
-    fontWeight: '600',
-    color: '#1A1A1A',
-    fontSize: 12,
-    letterSpacing: 0.5,
-  },
-  tableHeaderPhoto: {
-    width: 50,
-    fontWeight: '600',
-    color: '#1A1A1A',
-    fontSize: 12,
-  },
-  tableHeaderNameLarge: {
-    flex: 2,
-    fontWeight: '600',
-    color: '#1A1A1A',
-    fontSize: 12,
-  },
-  tableHeaderFlex1: {
-    flex: 1,
-    fontWeight: '600',
-    color: '#1A1A1A',
-    fontSize: 12,
-  },
-  tableHeaderFlex2: {
-    flex: 2,
-    fontWeight: '600',
-    color: '#1A1A1A',
-    fontSize: 12,
-  },
-  tableHeaderActions: {
-    width: 80,
-    fontWeight: '600',
-    color: '#1A1A1A',
-    fontSize: 12,
-  },
-  tableRow: {
-    flexDirection: 'row',
-    borderBottomWidth: 1,
-    borderBottomColor: '#DCDCDC',
-    paddingVertical: 12,
-    paddingHorizontal: 10,
-    alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-  },
-  tableCellFlex1: {
-    flex: 1,
+  tableCell: {
     fontSize: 14,
     color: '#4A4A4A',
-  },
-  tableCellFlex2: {
-    flex: 2,
-    fontSize: 14,
-    color: '#4A4A4A',
-  },
-  tableCellNameLarge: {
-    flex: 2,
-    fontSize: 14,
-    color: '#4A4A4A',
-  },
-  tableCellActions: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    width: 80,
+    textAlign: 'center',
   },
   memberPhotoSm: {
     width: 40,
     height: 40,
     borderRadius: 20,
   },
-  statusPill: {
-    paddingVertical: 4,
-    paddingHorizontal: 8,
-    borderRadius: 10,
-    fontSize: 12,
-    fontWeight: '500',
-    textAlign: 'center',
-  },
-  statusallowed: {
-    backgroundColor: '#d5f5e3',
-    color: '#27ae60',
-  },
-  statusdenied: {
-    backgroundColor: '#fadbd8',
-    color: '#e74c3c',
-  },
-  filtersBar: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-    marginBottom: 15,
-  },
-  formGroup: {
-    width: '48%',
-    marginBottom: 15,
-  },
-  label: {
-    fontSize: 14,
-    color: '#4A4A4A',
-    marginBottom: 5,
-    fontWeight: '500',
-  },
-  input: {
-    padding: 10,
-    borderWidth: 1,
-    borderColor: '#DCDCDC',
-    borderRadius: 5,
-    fontSize: 14,
-  },
-  picker: {
-    borderWidth: 1,
-    borderColor: '#DCDCDC',
-    borderRadius: 5,
-    height: 40,
+  cellPhoto: {
+    width: 50,
+    alignItems: 'center',
     justifyContent: 'center',
+    padding: 5,
+    borderRightWidth: 0.5,
+    borderRightColor: '#ccc',
+  },
+  cellName: {
+    flex: 2,
+    justifyContent: 'center',
+    paddingHorizontal: 5,
+    borderRightWidth: 0.5,
+    borderRightColor: '#ccc',
+  },
+  cellMembership: {
+    flex: 1.5,
+    justifyContent: 'center',
+    paddingHorizontal: 5,
+    borderRightWidth: 0.5,
+    borderRightColor: '#ccc',
+  },
+  cellActions: {
+    width: 80,
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
   },
 });
 

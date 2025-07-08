@@ -7,17 +7,16 @@ import {
   ScrollView,
   TouchableOpacity,
   TextInput,
+  SafeAreaView,
 } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import CustomHeader from '../components/CustomHeader';
-import { SafeAreaView } from 'react-native';
 
 const reportTypes = [
   { id: 'gym_usage', title: 'Uso del Gimnasio', description: 'Afluencia, horas pico, uso de zonas.' },
   { id: 'supp_consumption', title: 'Consumo de Suplementos', description: 'Ventas, tendencias, productos populares.' },
   { id: 'env_performance', title: 'Rendimiento Ambiental', description: 'Cumplimiento de rangos T°/Humedad.' },
-  //{ id: 'energy_consumption', title: 'Consumo Energético', description: 'Detalle de uso, comparativas.' },
   { id: 'access_activity', title: 'Actividad de Accesos', description: 'Registros detallados, permitidos/denegados.' },
   { id: 'general_report', title: 'Reporte General', description: 'Resumen consolidado de operaciones.' },
 ];
@@ -26,7 +25,6 @@ const ReportsScreen = ({ navigation }) => {
   const [selectedReportType, setSelectedReportType] = useState(null);
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
-
   const [gymZone, setGymZone] = useState('');
   const [timeRange, setTimeRange] = useState('');
   const [productCategory, setProductCategory] = useState('');
@@ -44,19 +42,24 @@ const ReportsScreen = ({ navigation }) => {
     alert(`Generando reporte de ${selectedReportType || 'General'} desde ${startDate} hasta ${endDate}`);
   };
 
-  const handleDownloadPdf = () => alert(`Descargando PDF de ${selectedReportType || 'General'}`);
-  const handleDownloadCsv = () => alert(`Descargando CSV de ${selectedReportType || 'General'}`);
+  const handleDownloadPdf = () => {
+    alert(`Descargando PDF de ${selectedReportType || 'General'}`);
+  };
+
+  const handleDownloadCsv = () => {
+    alert(`Descargando CSV de ${selectedReportType || 'General'}`);
+  };
 
   const renderSpecificFilters = () => {
     switch (selectedReportType) {
       case 'gym_usage':
         return (
-          <View style={styles.configRow}>
+          <View style={[styles.configRow, { flexDirection: 'column' }]}>
             <View style={styles.formGroup}>
               <Text style={styles.label}>Zona del Gimnasio:</Text>
               <Picker
                 selectedValue={gymZone}
-                onValueChange={(itemValue) => setGymZone(itemValue)}
+                onValueChange={setGymZone}
                 style={styles.picker}
               >
                 <Picker.Item label="Todas" value="" />
@@ -69,7 +72,7 @@ const ReportsScreen = ({ navigation }) => {
               <Text style={styles.label}>Franja Horaria:</Text>
               <Picker
                 selectedValue={timeRange}
-                onValueChange={(itemValue) => setTimeRange(itemValue)}
+                onValueChange={setTimeRange}
                 style={styles.picker}
               >
                 <Picker.Item label="Todo el día" value="" />
@@ -82,12 +85,12 @@ const ReportsScreen = ({ navigation }) => {
         );
       case 'supp_consumption':
         return (
-          <View style={styles.configRow}>
+          <View style={[styles.configRow, { flexDirection: 'column' }]}>
             <View style={styles.formGroup}>
               <Text style={styles.label}>Categoría de Producto:</Text>
               <Picker
                 selectedValue={productCategory}
-                onValueChange={(itemValue) => setProductCategory(itemValue)}
+                onValueChange={setProductCategory}
                 style={styles.picker}
               >
                 <Picker.Item label="Todas" value="" />
@@ -119,11 +122,11 @@ const ReportsScreen = ({ navigation }) => {
   return (
     <SafeAreaView style={styles.container}>
       <CustomHeader title="Reportes" navigation={navigation} />
-      
       <ScrollView style={styles.scrollViewContent}>
         <View style={styles.reportsArea}>
           <Text style={styles.pageTitle}>Informes y Análisis de Operaciones</Text>
 
+          {/* Paso 1: Selección de tipo de reporte */}
           <View style={styles.section}>
             <Text style={styles.sectionSubtitle}>1. Seleccione un Tipo de Reporte</Text>
             <View style={styles.reportSelectionGrid}>
@@ -136,12 +139,17 @@ const ReportsScreen = ({ navigation }) => {
                   ]}
                   onPress={() => handleSelectReportType(type.id)}
                 >
-                  {type.id === 'gym_usage' && <MaterialCommunityIcons name="dumbbell" size={40} color="#D90429" />}
-                  {type.id === 'supp_consumption' && <MaterialCommunityIcons name="pill" size={40} color="#D90429" />}
-                  {type.id === 'env_performance' && <MaterialCommunityIcons name="air-filter" size={40} color="#D90429" />}
-                  {type.id === 'energy_consumption' && <MaterialCommunityIcons name="lightning-bolt" size={40} color="#D90429" />}
-                  {type.id === 'access_activity' && <MaterialCommunityIcons name="account-group" size={40} color="#D90429" />}
-                  {type.id === 'general_report' && <MaterialCommunityIcons name="file-document-outline" size={40} color="#D90429" />}
+                  <MaterialCommunityIcons
+                    name={
+                      type.id === 'gym_usage' ? 'dumbbell' :
+                      type.id === 'supp_consumption' ? 'pill' :
+                      type.id === 'env_performance' ? 'air-filter' :
+                      type.id === 'access_activity' ? 'account-group' :
+                      'file-document-outline'
+                    }
+                    size={40}
+                    color="#D90429"
+                  />
                   <Text style={styles.reportTypeTitle}>{type.title}</Text>
                   <Text style={styles.reportTypeDescription}>{type.description}</Text>
                 </TouchableOpacity>
@@ -149,6 +157,7 @@ const ReportsScreen = ({ navigation }) => {
             </View>
           </View>
 
+          {/* Paso 2: Configurar parámetros */}
           <View style={styles.section}>
             <Text style={styles.sectionSubtitle}>2. Configure los Parámetros del Reporte</Text>
             <View style={styles.reportConfigurationPanel}>
@@ -177,6 +186,7 @@ const ReportsScreen = ({ navigation }) => {
                 {renderSpecificFilters()}
               </View>
 
+              {/* Acciones */}
               <View style={styles.actionsRow}>
                 <TouchableOpacity style={styles.btnGenerate} onPress={handleGenerateReport}>
                   <MaterialCommunityIcons name="play-circle-outline" size={20} color="#FFFFFF" style={styles.btnIcon} />
@@ -193,15 +203,6 @@ const ReportsScreen = ({ navigation }) => {
               </View>
             </View>
           </View>
-
-          <View style={styles.section}>
-            <Text style={styles.sectionSubtitle}>3. Visualización del Reporte</Text>
-            <View style={styles.reportDisplayArea}>
-              <Text style={styles.placeholderText}>
-                Seleccione un tipo de reporte y genere para ver los resultados aquí.
-              </Text>
-            </View>
-          </View>
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -209,25 +210,16 @@ const ReportsScreen = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f0f0f0',
-  },
-  scrollViewContent: {
-    flex: 1,
-  },
-  reportsArea: {
-    padding: 20,
-  },
+  container: { flex: 1, backgroundColor: '#f0f0f0' },
+  scrollViewContent: { flex: 1 },
+  reportsArea: { padding: 20 },
   pageTitle: {
     fontSize: 28,
     fontWeight: 'bold',
     color: '#1A1A1A',
     marginBottom: 15,
   },
-  section: {
-    marginBottom: 30,
-  },
+  section: { marginBottom: 30 },
   sectionSubtitle: {
     fontSize: 22,
     fontWeight: '500',
@@ -286,14 +278,13 @@ const styles = StyleSheet.create({
     marginBottom: 30,
   },
   configRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
+    flexDirection: 'column', 
     marginBottom: 10,
+    gap: 10, 
   },
+
   formGroup: {
-    flex: 1,
-    minWidth: 140,
-    marginHorizontal: 10,
+    width: '100%', // ✅ ahora cada campo ocupa todo el ancho disponible
     marginBottom: 15,
   },
   label: {
@@ -311,13 +302,15 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: '#4A4A4A',
   },
-  picker: {
-    height: 40,
-    width: '100%',
+    picker: {
     borderWidth: 1,
     borderColor: '#DCDCDC',
     borderRadius: 5,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
     backgroundColor: '#FFFFFF',
+    fontSize: 15,
+    color: '#4A4A4A',
   },
   noFiltersText: {
     textAlign: 'center',
@@ -325,6 +318,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     paddingVertical: 10,
   },
+  specificFiltersPlaceholder: { marginTop: 10 },
   actionsRow: {
     marginTop: 20,
     flexDirection: 'row',
@@ -367,19 +361,6 @@ const styles = StyleSheet.create({
   },
   btnIcon: {
     marginRight: 8,
-  },
-  reportDisplayArea: {
-    backgroundColor: '#FFFFFF',
-    padding: 30,
-    borderRadius: 8,
-    minHeight: 200,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  placeholderText: {
-    fontSize: 18,
-    color: '#7f8c8d',
-    textAlign: 'center',
   },
 });
 

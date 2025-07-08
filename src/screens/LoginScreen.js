@@ -22,7 +22,7 @@ const LoginScreen = ({ navigation }) => {
     console.log('Contraseña:', password);
 
     if (username === 'admin' && password === 'password') {
-      navigation.replace('MainApp');
+      navigation.replace('App Principal');
     } else {
       alert('Usuario o contraseña incorrectos. Usa "admin" y "password"');
     }
@@ -40,9 +40,7 @@ const LoginScreen = ({ navigation }) => {
             style={styles.logo}
           />
           <Text style={styles.title}>Bienvenido a Prime Gym</Text>
-          <Text style={styles.subtitle}>
-            Accede a la plataforma de administración
-          </Text>
+          <Text style={styles.subtitle}>Accede a la plataforma de administración</Text>
 
           <View style={styles.formGroup}>
             <Text style={styles.label}>Usuario o Correo Electrónico</Text>
@@ -69,18 +67,12 @@ const LoginScreen = ({ navigation }) => {
 
           <CustomButton title="Iniciar Sesión" onPress={handleLogin} />
 
-          <TouchableOpacity 
-            onPress={() => console.log('Olvidé mi contraseña')}
-            style={styles.forgotPasswordButton}
-          >
-            <Text style={styles.forgotPasswordLink}>
-              ¿Olvidaste tu contraseña?
-            </Text>
+          <TouchableOpacity onPress={() => console.log('Olvidé mi contraseña')} style={styles.forgotPasswordButton}>
+            <Text style={styles.forgotPasswordLink}>¿Olvidaste tu contraseña?</Text>
           </TouchableOpacity>
         </View>
-        <Text style={styles.footerText}>
-          &copy; 2025 DAT Solutions - Prime Gym
-        </Text>
+
+        <Text style={styles.footerText}>&copy; 2025 DAT Solutions - Prime Gym</Text>
       </ScrollView>
     </KeyboardAvoidingView>
   );

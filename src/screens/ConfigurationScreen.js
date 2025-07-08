@@ -8,12 +8,11 @@ import {
   TouchableOpacity,
   TextInput,
   Image,
-  Switch,
-  Alert
+  SafeAreaView,
+  Alert,
 } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import CustomHeader from '../components/CustomHeader';
-import { SafeAreaView } from 'react-native';
 
 const initialSensorsData = [
   {
@@ -51,11 +50,6 @@ const initialSensorsData = [
 ];
 
 const ConfigurationScreen = ({ navigation }) => {
-  const [adminName, setAdminName] = useState('Usuario Admin');
-  const [adminEmail, setAdminEmail] = useState('admin@primegym.com');
-  const [adminPassword, setAdminPassword] = useState('');
-  const [adminPasswordConfirm, setAdminPasswordConfirm] = useState('');
-
   const [gymName, setGymName] = useState('Prime Gym Durango');
   const [gymAddress, setGymAddress] = useState('Av. Siempre Viva 123, Col. Centro');
   const [gymPhone, setGymPhone] = useState('618-123-4567');
@@ -63,45 +57,23 @@ const ConfigurationScreen = ({ navigation }) => {
 
   const [sensors, setSensors] = useState(initialSensorsData);
 
-  const [notifyEnvEmail, setNotifyEnvEmail] = useState(true);
-  const [notifyEnvPlatform, setNotifyEnvPlatform] = useState(true);
-  const [notifyStockEmail, setNotifyStockEmail] = useState(false);
-  const [notifyStockPlatform, setNotifyStockPlatform] = useState(true);
-  const [notifySensorEmail, setNotifySensorEmail] = useState(true);
-
-  const handleSaveProfile = () => {
-    if (adminPassword !== adminPasswordConfirm) {
-      Alert.alert('Error', 'Las contraseñas no coinciden');
-      return;
-    }
-    
-    Alert.alert(
-      'Guardar Perfil',
-      '¿Desea guardar los cambios en su perfil?',
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        { text: 'Guardar', onPress: () => console.log('Guardando perfil') }
-      ]
-    );
-  };
-
   const handleSaveGymInfo = () => {
     Alert.alert(
       'Guardar Información',
       '¿Desea guardar los cambios en la información del gimnasio?',
       [
         { text: 'Cancelar', style: 'cancel' },
-        { text: 'Guardar', onPress: () => console.log('Guardando info gimnasio') }
+        { text: 'Guardar', onPress: () => console.log('Guardando info gimnasio') },
       ]
     );
   };
 
   const handleAddNewSensor = () => {
-    navigation.navigate('AddSensorScreen');
+    Alert.alert('Añadir Sensor');
   };
 
-  const handleEditSensor = (sensorId) => {
-    navigation.navigate('EditSensorScreen', { sensorId });
+  const handleEditSensor = (sensorName) => {
+    Alert.alert(`Editar sensor ${sensorName}?`,);
   };
 
   const handleRestartSensor = (sensorName) => {
@@ -110,18 +82,7 @@ const ConfigurationScreen = ({ navigation }) => {
       `¿Está seguro de reiniciar el sensor ${sensorName}?`,
       [
         { text: 'Cancelar', style: 'cancel' },
-        { text: 'Reiniciar', onPress: () => console.log('Reiniciando sensor') }
-      ]
-    );
-  };
-
-  const handleSaveNotificationPreferences = () => {
-    Alert.alert(
-      'Guardar Preferencias',
-      '¿Desea guardar los cambios en las preferencias de notificación?',
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        { text: 'Guardar', onPress: () => console.log('Guardando preferencias') }
+        { text: 'Reiniciar', onPress: () => console.log('Reiniciando sensor') },
       ]
     );
   };
@@ -142,8 +103,8 @@ const ConfigurationScreen = ({ navigation }) => {
   return (
     <SafeAreaView style={styles.container}>
       <CustomHeader title="Configuración" navigation={navigation} />
-      
-      <ScrollView 
+
+      <ScrollView
         style={styles.scrollViewContent}
         contentContainerStyle={styles.scrollContentContainer}
       >
@@ -151,104 +112,48 @@ const ConfigurationScreen = ({ navigation }) => {
           <Text style={styles.pageTitle}>Configuración del Sistema</Text>
           <Text style={styles.pageSubtitle}>Ajustes generales y administración</Text>
 
-          {/* Perfil de Administrador */}
-          <View style={styles.settingsCard}>
-            <Text style={styles.cardTitle}>Perfil de Administrador</Text>
-            
-            <View style={styles.formGrid}>
-              <View style={styles.formGroup}>
-                <Text style={styles.label}>Nombre de Usuario</Text>
-                <TextInput 
-                  style={styles.input} 
-                  value={adminName} 
-                  onChangeText={setAdminName} 
-                />
-              </View>
-              
-              <View style={styles.formGroup}>
-                <Text style={styles.label}>Correo Electrónico</Text>
-                <TextInput 
-                  style={styles.input} 
-                  value={adminEmail} 
-                  onChangeText={setAdminEmail} 
-                  keyboardType="email-address" 
-                />
-              </View>
-              
-              <View style={styles.formGroup}>
-                <Text style={styles.label}>Nueva Contraseña</Text>
-                <TextInput 
-                  style={styles.input} 
-                  value={adminPassword} 
-                  onChangeText={setAdminPassword} 
-                  secureTextEntry 
-                  placeholder="Dejar en blanco para no cambiar"
-                  placeholderTextColor="#95a5a6"
-                />
-              </View>
-              
-              <View style={styles.formGroup}>
-                <Text style={styles.label}>Confirmar Contraseña</Text>
-                <TextInput 
-                  style={styles.input} 
-                  value={adminPasswordConfirm} 
-                  onChangeText={setAdminPasswordConfirm} 
-                  secureTextEntry 
-                />
-              </View>
-            </View>
-            
-            <TouchableOpacity 
-              style={styles.primaryButton} 
-              onPress={handleSaveProfile}
-            >
-              <MaterialCommunityIcons name="content-save" size={20} color="white" />
-              <Text style={styles.buttonText}>Guardar Perfil</Text>
-            </TouchableOpacity>
-          </View>
-
           {/* Información del Gimnasio */}
           <View style={styles.settingsCard}>
             <Text style={styles.cardTitle}>Información del Gimnasio</Text>
-            
+
             <View style={styles.formGrid}>
               <View style={styles.formGroup}>
                 <Text style={styles.label}>Nombre del Gimnasio</Text>
-                <TextInput 
-                  style={styles.input} 
-                  value={gymName} 
-                  onChangeText={setGymName} 
+                <TextInput
+                  style={styles.input}
+                  value={gymName}
+                  onChangeText={setGymName}
                 />
               </View>
-              
+
               <View style={styles.formGroup}>
                 <Text style={styles.label}>Dirección</Text>
-                <TextInput 
-                  style={styles.input} 
-                  value={gymAddress} 
-                  onChangeText={setGymAddress} 
+                <TextInput
+                  style={styles.input}
+                  value={gymAddress}
+                  onChangeText={setGymAddress}
                 />
               </View>
-              
+
               <View style={styles.formGroup}>
                 <Text style={styles.label}>Teléfono</Text>
-                <TextInput 
-                  style={styles.input} 
-                  value={gymPhone} 
-                  onChangeText={setGymPhone} 
-                  keyboardType="phone-pad" 
+                <TextInput
+                  style={styles.input}
+                  value={gymPhone}
+                  onChangeText={setGymPhone}
+                  keyboardType="phone-pad"
                 />
               </View>
-              
+
               <View style={styles.formGroup}>
                 <Text style={styles.label}>Logo Actual</Text>
-                <Image 
-                  source={require('../../assets/Prime_Gym.jpg')} 
-                  style={styles.gymLogo} 
+                <Image
+                  source={require('../../assets/Prime_Gym.jpg')}
+                  style={styles.gymLogo}
                 />
               </View>
             </View>
-            
+
             <View style={styles.fullWidthGroup}>
               <Text style={styles.label}>Zonas del Gimnasio</Text>
               <TextInput
@@ -260,9 +165,9 @@ const ConfigurationScreen = ({ navigation }) => {
                 placeholderTextColor="#95a5a6"
               />
             </View>
-            
-            <TouchableOpacity 
-              style={styles.primaryButton} 
+
+            <TouchableOpacity
+              style={styles.primaryButton}
               onPress={handleSaveGymInfo}
             >
               <MaterialCommunityIcons name="content-save" size={20} color="white" />
@@ -273,130 +178,52 @@ const ConfigurationScreen = ({ navigation }) => {
           {/* Gestión de Sensores */}
           <View style={styles.settingsCard}>
             <Text style={styles.cardTitle}>Gestión de Sensores</Text>
-            
-            <TouchableOpacity 
-              style={styles.secondaryButton} 
+
+            <TouchableOpacity
+              style={styles.secondaryButton}
               onPress={handleAddNewSensor}
             >
               <MaterialCommunityIcons name="plus-circle" size={20} color="white" />
               <Text style={styles.buttonText}>Añadir Sensor</Text>
             </TouchableOpacity>
-            
-            <View style={styles.tableContainer}>
-              <View style={styles.tableHeader}>
-                <Text style={[styles.tableHeaderCell, styles.flex2]}>Sensor</Text>
-                <Text style={[styles.tableHeaderCell, styles.flex2]}>Tipo</Text>
-                <Text style={[styles.tableHeaderCell, styles.flex1]}>Zona</Text>
-                <Text style={[styles.tableHeaderCell, styles.flex1]}>Estado</Text>
-                <Text style={[styles.tableHeaderCell, styles.flex1]}>Batería</Text>
-                <Text style={[styles.tableHeaderCell, styles.flex1]}>Acciones</Text>
-              </View>
-              
-              {sensors.map((sensor) => {
-                const status = getSensorStatus(sensor.status);
-                return (
-                  <View key={sensor.id} style={styles.tableRow}>
-                    <Text style={[styles.tableCell, styles.flex2]}>{sensor.name}</Text>
-                    <Text style={[styles.tableCell, styles.flex2]}>{sensor.type}</Text>
-                    <Text style={[styles.tableCell, styles.flex1]}>{sensor.zone}</Text>
-                    <View style={[styles.tableCell, styles.flex1, styles.statusCell]}>
-                      <View style={[styles.statusDot, { backgroundColor: status.color }]} />
-                      <Text>{status.text}</Text>
-                    </View>
-                    <Text style={[styles.tableCell, styles.flex1]}>{sensor.battery}</Text>
-                    <View style={[styles.tableCell, styles.flex1, styles.actionsCell]}>
-                      <TouchableOpacity onPress={() => handleEditSensor(sensor.id)}>
-                        <MaterialCommunityIcons name="pencil" size={20} color="#3498db" />
-                      </TouchableOpacity>
-                      <TouchableOpacity onPress={() => handleRestartSensor(sensor.name)}>
-                        <MaterialCommunityIcons name="restart" size={20} color="#f39c12" />
-                      </TouchableOpacity>
-                    </View>
-                  </View>
-                );
-              })}
-            </View>
-          </View>
 
-          {/* Notificaciones */}
-          <View style={styles.settingsCard}>
-  <Text style={styles.cardTitle}>Preferencias de Notificación</Text>
-  <Text style={styles.cardDescription}>
-    Configure cómo desea recibir las alertas del sistema
-  </Text>
-  
-  {/* Lista con puntitos */}
-  <View style={styles.notificationList}>
-    <Text style={styles.notificationTitle}>Alertas Ambientales</Text>
-    
-    <TouchableOpacity 
-      style={styles.notificationItem}
-      onPress={() => setNotifyEnvEmail(!notifyEnvEmail)}
-    >
-      <View style={[
-        styles.dot, 
-        notifyEnvEmail ? styles.activeDot : styles.inactiveDot
-      ]} />
-      <Text style={styles.notificationText}>Notificaciones por Email</Text>
-    </TouchableOpacity>
-    
-    <TouchableOpacity 
-      style={styles.notificationItem}
-      onPress={() => setNotifyEnvPlatform(!notifyEnvPlatform)}
-    >
-      <View style={[
-        styles.dot, 
-        notifyEnvPlatform ? styles.activeDot : styles.inactiveDot
-      ]} />
-      <Text style={styles.notificationText}>Alertas en Plataforma</Text>
-    </TouchableOpacity>
-    
-    <Text style={styles.notificationTitle}>Alertas de Inventario</Text>
-    
-    <TouchableOpacity 
-      style={styles.notificationItem}
-      onPress={() => setNotifyStockEmail(!notifyStockEmail)}
-    >
-      <View style={[
-        styles.dot, 
-        notifyStockEmail ? styles.activeDot : styles.inactiveDot
-      ]} />
-      <Text style={styles.notificationText}>Notificaciones por Email</Text>
-    </TouchableOpacity>
-    
-    <TouchableOpacity 
-      style={styles.notificationItem}
-      onPress={() => setNotifyStockPlatform(!notifyStockPlatform)}
-    >
-      <View style={[
-        styles.dot, 
-        notifyStockPlatform ? styles.activeDot : styles.inactiveDot
-      ]} />
-      <Text style={styles.notificationText}>Alertas en Plataforma</Text>
-    </TouchableOpacity>
-    
-    <Text style={styles.notificationTitle}>Alertas de Sensores</Text>
-    
-    <TouchableOpacity 
-      style={styles.notificationItem}
-      onPress={() => setNotifySensorEmail(!notifySensorEmail)}
-    >
-      <View style={[
-        styles.dot, 
-        notifySensorEmail ? styles.activeDot : styles.inactiveDot
-      ]} />
-      <Text style={styles.notificationText}>Notificaciones por Email</Text>
-    </TouchableOpacity>
-  </View>
-  
-  <TouchableOpacity 
-    style={styles.primaryButton} 
-    onPress={handleSaveNotificationPreferences}
-  >
-    <MaterialCommunityIcons name="content-save" size={20} color="white" />
-    <Text style={styles.buttonText}>Guardar Preferencias</Text>
-  </TouchableOpacity>
-</View>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+              <View style={styles.tableContainer}>
+                <View style={styles.tableHeader}>
+                  <Text style={[styles.tableHeaderCell, styles.sensorColumn]}>Sensor</Text>
+                  <Text style={[styles.tableHeaderCell, styles.typeColumn]}>Tipo</Text>
+                  <Text style={[styles.tableHeaderCell, styles.zoneColumn]}>Zona</Text>
+                  <Text style={[styles.tableHeaderCell, styles.statusColumn]}>Estado</Text>
+                  <Text style={[styles.tableHeaderCell, styles.batteryColumn]}>Batería</Text>
+                  <Text style={[styles.tableHeaderCell, styles.actionsColumn]}>Acciones</Text>
+                </View>
+
+                {sensors.map((sensor) => {
+                  const status = getSensorStatus(sensor.status);
+                  return (
+                    <View key={sensor.id} style={styles.tableRow}>
+                      <Text style={[styles.tableCell, styles.sensorColumn]}>{sensor.name}</Text>
+                      <Text style={[styles.tableCell, styles.typeColumn]}>{sensor.type}</Text>
+                      <Text style={[styles.tableCell, styles.zoneColumn]}>{sensor.zone}</Text>
+                      <View style={[styles.tableCell, styles.statusColumn]}>
+                        <View style={[styles.statusDot, { backgroundColor: status.color }]} />
+                        <Text>{status.text}</Text>
+                      </View>
+                      <Text style={[styles.tableCell, styles.batteryColumn]}>{sensor.battery}</Text>
+                      <View style={[styles.tableCell, styles.actionsColumn]}>
+                        <TouchableOpacity onPress={() => handleEditSensor(sensor.name)}>
+                          <MaterialCommunityIcons name="pencil" size={20} color="#3498db" />
+                        </TouchableOpacity>
+                        <TouchableOpacity onPress={() => handleRestartSensor(sensor.name)}>
+                          <MaterialCommunityIcons name="restart" size={20} color="#f39c12" />
+                        </TouchableOpacity>
+                      </View>
+                    </View>
+                  );
+                })}
+              </View>
+            </ScrollView>
+          </View>
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -404,30 +231,12 @@ const ConfigurationScreen = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f0f0f0',
-  },
-  scrollViewContent: {
-    flex: 1,
-  },
-  scrollContentContainer: {
-    paddingBottom: 30,
-  },
-  settingsArea: {
-    padding: 20,
-  },
-  pageTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#1A1A1A',
-    marginBottom: 5,
-  },
-  pageSubtitle: {
-    fontSize: 16,
-    color: '#7f8c8d',
-    marginBottom: 20,
-  },
+  container: { flex: 1, backgroundColor: '#f0f0f0' },
+  scrollViewContent: { flex: 1 },
+  scrollContentContainer: { paddingBottom: 30 },
+  settingsArea: { padding: 20 },
+  pageTitle: { fontSize: 24, fontWeight: 'bold', color: '#1A1A1A', marginBottom: 5 },
+  pageSubtitle: { fontSize: 16, color: '#7f8c8d', marginBottom: 20 },
   settingsCard: {
     backgroundColor: '#FFFFFF',
     borderRadius: 8,
@@ -448,31 +257,15 @@ const styles = StyleSheet.create({
     borderBottomColor: '#DCDCDC',
     paddingBottom: 10,
   },
-  cardDescription: {
-    fontSize: 14,
-    color: '#7f8c8d',
-    marginBottom: 20,
-  },
   formGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
     marginBottom: 15,
   },
-  formGroup: {
-    width: '48%',
-    marginBottom: 15,
-  },
-  fullWidthGroup: {
-    width: '100%',
-    marginBottom: 15,
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#4A4A4A',
-    marginBottom: 8,
-  },
+  formGroup: { width: '48%', marginBottom: 15 },
+  fullWidthGroup: { width: '100%', marginBottom: 15 },
+  label: { fontSize: 14, fontWeight: '500', color: '#4A4A4A', marginBottom: 8 },
   input: {
     borderWidth: 1,
     borderColor: '#DCDCDC',
@@ -541,6 +334,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     fontSize: 12,
     color: '#4A4A4A',
+    textAlign: 'left',
   },
   tableRow: {
     flexDirection: 'row',
@@ -550,74 +344,22 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     backgroundColor: '#FFFFFF',
   },
-  tableCell: {
-    fontSize: 14,
-    color: '#4A4A4A',
-  },
-  flex1: {
-    flex: 1,
-  },
-  flex2: {
-    flex: 2,
-  },
-  statusCell: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
+  tableCell: { fontSize: 14, color: '#4A4A4A', textAlign: 'left' },
   statusDot: {
     width: 10,
     height: 10,
     borderRadius: 5,
     marginRight: 6,
   },
-  actionsCell: {
+  sensorColumn: { width: 180 },
+  typeColumn: { width: 200 },
+  zoneColumn: { width: 150 },
+  statusColumn: { width: 120, flexDirection: 'row', alignItems: 'center' },
+  batteryColumn: { width: 100 },
+  actionsColumn: {
+    width: 100,
     flexDirection: 'row',
     justifyContent: 'space-around',
-  },
-  notificationList: {
-  marginBottom: 15,
-  },
-  notificationItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 10,
-    marginBottom: 5,
-  },
-  dot: {
-    width: 16,
-    height: 16,
-    borderRadius: 8,
-    marginRight: 12,
-  },
-  activeDot: {
-    backgroundColor: '#D90429',
-  },
-  inactiveDot: {
-    backgroundColor: '#DCDCDC',
-  },
-  notificationText: {
-    fontSize: 15,
-    color: '#4A4A4A',
-  },
-  notificationGroup: {
-    marginBottom: 20,
-  },
-  notificationTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#2c3e50',
-    marginTop: 15,
-    marginBottom: 8,
-  },
-  switchContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  switchLabel: {
-    fontSize: 14,
-    color: '#4A4A4A',
-    marginLeft: 10,
   },
 });
 
