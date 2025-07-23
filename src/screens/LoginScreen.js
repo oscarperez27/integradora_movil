@@ -12,36 +12,43 @@ import {
   Platform,
 } from 'react-native';
 import CustomButton from '../components/CustomButton';
-import axios from 'axios';
-
+import { API } from '../api/apiConfig';
 
 const LoginScreen = ({ navigation }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
 
   const handleLogin = async () => {
-  try {
-    const response = await axios.post('http://192.168.3.14:3000/api/auth/login-user', {
-      identifier: username,
-      password: password,
-    });
+    try {
+      const response = await fetch(`${API}/api/auth/login-user`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          identifier: username,
+          password: password,
+        }),
+      });
 
-    const { accessToken, user } = response.data;
+      const data = await response.json();
 
-    console.log('Token recibido:', accessToken);
-    console.log('Usuario:', user);
+      if (!response.ok) {
+        throw new Error(data.message || 'Error en el inicio de sesión');
+      }
 
-    // Aquí podrías guardar el token con AsyncStorage o context global
-    navigation.replace('App Principal', { user }); // Puedes enviar los datos si lo necesitas
+      const { accessToken, user } = data;
 
-  } catch (error) {
-    if (error.response) {
-      alert(error.response.data.message);
-    } else {
-      alert('Error de red o servidor no disponible.');
+      console.log('Token recibido:', accessToken);
+      console.log('Usuario:', user);
+
+      // Aquí podrías guardar el token con AsyncStorage o context global
+      navigation.replace('App Principal', { user });
+
+    } catch (error) {
+      alert(error.message || 'Error de red o servidor no disponible.');
     }
-  }
-};
+  };
 
   return (
     <KeyboardAvoidingView
