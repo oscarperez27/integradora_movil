@@ -1,5 +1,5 @@
 import 'react-native-gesture-handler';
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createDrawerNavigator } from '@react-navigation/drawer';
@@ -8,7 +8,6 @@ import {
   MaterialCommunityIcons, 
   FontAwesome5, 
   Ionicons,
-  FontAwesome,
   Feather,
   MaterialIcons
 } from '@expo/vector-icons';
@@ -23,13 +22,15 @@ import InventoryScreen from './src/screens/InventoryScreen';
 import ReportsScreen from './src/screens/ReportsScreen';
 import ConfigurationScreen from './src/screens/ConfigurationScreen';
 import AdminProfileScreen from './src/screens/AdminProfileScreen';
+import OrderScreen from './src/screens/OrderScreen';
+import EmployeScreen from './src/screens/EmployeScreen';
 
 const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
 
-// Componente Personalizado para el Contenido del Drawer (Sidebar)
+// Contenido personalizado del drawer
 const CustomDrawerContent = (props) => {
-  const { navigation } = props;
+  const { navigation, userRole } = props;
   const insets = useSafeAreaInsets();
 
   return (
@@ -61,13 +62,13 @@ const CustomDrawerContent = (props) => {
             <Text style={styles.drawerItemText}>Monitoreo Ambiental</Text>
           </TouchableOpacity>
 
-          {/* Control de Acceso */}
+          {/* Gestión de Clientes */}
           <TouchableOpacity
             style={styles.drawerItem}
             onPress={() => navigation.navigate('AccessControlTab')}
           >
-            <MaterialCommunityIcons name="fingerprint" size={24} color="#f0f0f0" style={styles.icon} />
-            <Text style={styles.drawerItemText}>Control de Acceso</Text>
+            <MaterialCommunityIcons name="account-group" size={24} color="#f0f0f0" style={styles.icon} />
+            <Text style={styles.drawerItemText}>Gestión de Clientes</Text>
           </TouchableOpacity>
 
           {/* Inventario */}
@@ -75,9 +76,29 @@ const CustomDrawerContent = (props) => {
             style={styles.drawerItem}
             onPress={() => navigation.navigate('InventoryTab')}
           >
-            <FontAwesome5 name="boxes" size={22} color="#f0f0f0" style={styles.icon} />
+            <FontAwesome5 name="warehouse" size={22} color="#f0f0f0" style={styles.icon} />
             <Text style={styles.drawerItemText}>Inventario</Text>
           </TouchableOpacity>
+
+          {/* Órdenes */}
+          <TouchableOpacity
+            style={styles.drawerItem}
+            onPress={() => navigation.navigate('OrderTab')}
+          >
+            <FontAwesome5 name="boxes" size={22} color="#f0f0f0" style={styles.icon} />
+            <Text style={styles.drawerItemText}>Órdenes</Text>
+          </TouchableOpacity>
+
+          {/* Gestión de Empleados — solo admins */}
+          {userRole === 'admin' && (
+            <TouchableOpacity
+              style={styles.drawerItem}
+              onPress={() => navigation.navigate('EmployeTab')}
+            >
+              <MaterialCommunityIcons name="account-tie" size={24} color="#f0f0f0" style={styles.icon} />
+              <Text style={styles.drawerItemText}>Gestión de Empleados</Text>
+            </TouchableOpacity>
+          )}
 
           {/* Reportes */}
           <TouchableOpacity
@@ -102,12 +123,12 @@ const CustomDrawerContent = (props) => {
   );
 };
 
-// Drawer Navigator Principal
-const DrawerNavigator = () => {
+// Drawer Navigator principal con control de roles
+const DrawerNavigator = ({ userRole }) => {
   return (
     <Drawer.Navigator
       initialRouteName="DashboardTab"
-      drawerContent={(props) => <CustomDrawerContent {...props} />}
+      drawerContent={(props) => <CustomDrawerContent {...props} userRole={userRole} />}
       screenOptions={{
         headerShown: false,
         drawerStyle: {
@@ -139,7 +160,7 @@ const DrawerNavigator = () => {
         component={AccessControlScreen}
         options={{
           drawerIcon: ({color, size}) => (
-            <MaterialCommunityIcons name="fingerprint" size={size} color={color} />
+            <MaterialCommunityIcons name="account-group" size={size} color={color} />
           )
         }}
       />
@@ -148,10 +169,31 @@ const DrawerNavigator = () => {
         component={InventoryScreen}
         options={{
           drawerIcon: ({color, size}) => (
+            <FontAwesome5 name="warehouse" size={size} color={color} />
+          )
+        }}
+      />
+      <Drawer.Screen 
+        name="OrderTab" 
+        component={OrderScreen}
+        options={{
+          drawerIcon: ({color, size}) => (
             <FontAwesome5 name="boxes" size={size} color={color} />
           )
         }}
       />
+      {/* Solo admins ven esta pantalla */}
+      {userRole === 'admin' && (
+        <Drawer.Screen 
+          name="EmployeTab" 
+          component={EmployeScreen}
+          options={{
+            drawerIcon: ({color, size}) => (
+              <MaterialCommunityIcons name="account-tie" size={size} color={color} />
+            )
+          }}
+        />
+      )}
       <Drawer.Screen 
         name="ReportsTab" 
         component={ReportsScreen}
@@ -174,8 +216,24 @@ const DrawerNavigator = () => {
   );
 };
 
-// Navegador Raíz (Autenticación y App Principal)
+// Navegador raíz con estado simulado de rol
 export default function App() {
+  const [userRole, setUserRole] = useState(null);
+
+  useEffect(() => {
+    // Simula obtener el rol real (reemplaza con tu lógica)
+    const roleFromLogin = "admin"; // o "user", etc.
+    setUserRole(roleFromLogin);
+  }, []);
+
+  if (userRole === null) {
+    return (
+      <View style={{ flex:1, justifyContent:'center', alignItems:'center' }}>
+        <Text>Cargando...</Text>
+      </View>
+    );
+  }
+
   return (
     <NavigationContainer>
       <Stack.Navigator initialRouteName="Login">
@@ -186,18 +244,18 @@ export default function App() {
         />
         <Stack.Screen
           name="App Principal"
-          component={DrawerNavigator}
+          children={() => <DrawerNavigator userRole={userRole} />}
           options={{ headerShown: false }}
         />
-        <Stack.Screen name="Perfil" 
-        component={AdminProfileScreen} 
+        <Stack.Screen 
+          name="Perfil" 
+          component={AdminProfileScreen} 
         />
       </Stack.Navigator>
     </NavigationContainer>
   );
 }
 
-// Estilos para el CustomDrawerContent
 const styles = StyleSheet.create({
   drawerContainer: {
     flex: 1,
@@ -242,12 +300,5 @@ const styles = StyleSheet.create({
     marginRight: 12,
     width: 24,
     textAlign: 'center',
-  },
-  drawerItemActive: {
-    backgroundColor: '#D90429',
-  },
-  drawerItemTextActive: {
-    color: '#FFFFFF',
-    fontWeight: 'bold',
   },
 });

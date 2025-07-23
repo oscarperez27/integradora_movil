@@ -13,12 +13,6 @@ import {
 import { Picker } from '@react-native-picker/picker';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import CustomHeader from '../components/CustomHeader';
-import { 
-  getProducts, 
-  createProduct, 
-  updateProduct as apiUpdateProduct, 
-  deleteProduct as apiDeleteProduct 
-} from '../api/productService';
 
 const InventoryScreen = ({ navigation }) => {
   const [products, setProducts] = useState([]);

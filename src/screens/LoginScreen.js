@@ -12,6 +12,7 @@ import {
   Platform,
 } from 'react-native';
 import CustomButton from '../components/CustomButton';
+import AsyncStorage from "@react-native-async-storage/async-storage"; 
 import { API } from '../api/apiConfig';
 
 const LoginScreen = ({ navigation }) => {
@@ -42,7 +43,9 @@ const LoginScreen = ({ navigation }) => {
       console.log('Token recibido:', accessToken);
       console.log('Usuario:', user);
 
-      // Aquí podrías guardar el token con AsyncStorage o context global
+      // Guardar token en AsyncStorage
+      await AsyncStorage.setItem('token', accessToken);
+
       navigation.replace('App Principal', { user });
 
     } catch (error) {
