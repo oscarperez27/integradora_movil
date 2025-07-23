@@ -12,21 +12,36 @@ import {
   Platform,
 } from 'react-native';
 import CustomButton from '../components/CustomButton';
+import axios from 'axios';
+
 
 const LoginScreen = ({ navigation }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleLogin = () => {
-    console.log('Usuario:', username);
-    console.log('Contraseña:', password);
+  const handleLogin = async () => {
+  try {
+    const response = await axios.post('http://192.168.3.14:3000/api/auth/login-user', {
+      identifier: username,
+      password: password,
+    });
 
-    if (username === 'admin' && password === 'password') {
-      navigation.replace('App Principal');
+    const { accessToken, user } = response.data;
+
+    console.log('Token recibido:', accessToken);
+    console.log('Usuario:', user);
+
+    // Aquí podrías guardar el token con AsyncStorage o context global
+    navigation.replace('App Principal', { user }); // Puedes enviar los datos si lo necesitas
+
+  } catch (error) {
+    if (error.response) {
+      alert(error.response.data.message);
     } else {
-      alert('Usuario o contraseña incorrectos. Usa "admin" y "password"');
+      alert('Error de red o servidor no disponible.');
     }
-  };
+  }
+};
 
   return (
     <KeyboardAvoidingView

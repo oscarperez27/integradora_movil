@@ -1,4 +1,3 @@
-// src/screens/InventoryScreen.js
 import React, { useState, useEffect } from 'react';
 import {
   View,
@@ -14,73 +13,160 @@ import {
 import { Picker } from '@react-native-picker/picker';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import CustomHeader from '../components/CustomHeader';
-
-const initialInventoryData = [
-  { sku: 'PROT-WH001', name: 'Proteína Whey Gold Standard 2lb', category: 'Proteínas', stock: 25, price: '$850.00', status: 'in-stock' },
-  { sku: 'CREA-MON005', name: 'Creatina Monohidratada 300g', category: 'Creatinas', stock: 8, price: '$450.00', status: 'low-stock' },
-  { sku: 'PREW-C4001', name: 'C4 Pre-Entreno Explosivo', category: 'Pre-Entrenos', stock: 0, price: '$600.00', status: 'out-of-stock' },
-  { sku: 'ACC-SHK003', name: 'Shaker Prime Gym Logo', category: 'Accesorios', stock: 50, price: '$150.00', status: 'in-stock' },
-  { sku: 'ROPA-TSH01', name: 'Playera Dry-Fit', category: 'Ropa', stock: 12, price: '$300.00', status: 'low-stock' },
-  { sku: 'SUP-BCAA001', name: 'BCAAs Aminoácidos', category: 'Proteínas', stock: 18, price: '$550.00', status: 'in-stock' },
-];
+import { 
+  getProducts, 
+  createProduct, 
+  updateProduct as apiUpdateProduct, 
+  deleteProduct as apiDeleteProduct 
+} from '../api/productService';
 
 const InventoryScreen = ({ navigation }) => {
-  const [products, setProducts] = useState(initialInventoryData);
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterCategory, setFilterCategory] = useState('');
   const [filterStockStatus, setFilterStockStatus] = useState('');
 
+  // Cargar productos al montar el componente
   useEffect(() => {
-    const filtered = initialInventoryData.filter(product => {
-      const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                            product.sku.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesCategory = !filterCategory || product.category === filterCategory;
-      const matchesStockStatus = !filterStockStatus || product.status === filterStockStatus;
-      return matchesSearch && matchesCategory && matchesStockStatus;
-    });
-    setProducts(filtered);
-  }, [searchQuery, filterCategory, filterStockStatus]);
+    fetchProducts();
+  }, []);
 
-  const handleEditProduct = (productName) => {
-    Alert.alert('Editar Producto', `¿Desea editar el producto ${productName}?`, [
-      { text: 'Cancelar', style: 'cancel' },
-      { text: 'Editar', onPress: () => console.log('Editar producto') },
-    ]);
-  };
-
-  const handleDeleteProduct = (productName) => {
-    Alert.alert('Eliminar Producto', `¿Está seguro de eliminar ${productName}?`, [
-      { text: 'Cancelar', style: 'cancel' },
-      { text: 'Eliminar', style: 'destructive', onPress: () => console.log('Eliminar producto') },
-    ]);
-  };
-
-  const getStatusStyle = (status) => {
-    switch (status) {
-      case 'in-stock': return styles.statusInStock;
-      case 'low-stock': return styles.statusLowStock;
-      case 'out-of-stock': return styles.statusOutOfStock;
-      default: return {};
+  const fetchProducts = async () => {
+    try {
+      setLoading(true);
+      const productsData = await getProducts();
+      setProducts(productsData);
+    } catch (error) {
+      Alert.alert("Error", "No se pudieron cargar los productos");
+      console.error("Error fetching products:", error);
+    } finally {
+      setLoading(false);
     }
+  };
+
+  // Filtrar productos basado en búsqueda y filtros
+  const filteredProducts = products.filter(product => {
+    const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         product.sku.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesCategory = !filterCategory || product.categoria === filterCategory;
+    
+    // Determinar estado de stock
+    let status = '';
+    if (product.stock === 0) status = 'out-of-stock';
+    else if (product.stock < 10) status = 'low-stock';
+    else status = 'in-stock';
+    
+    const matchesStockStatus = !filterStockStatus || status === filterStockStatus;
+    
+    return matchesSearch && matchesCategory && matchesStockStatus;
+  });
+
+  const handleAddProduct = () => {
+    // Aquí puedes implementar un modal o navegar a una pantalla de creación
+    Alert.prompt(
+      'Agregar Producto',
+      'Ingrese el nombre del nuevo producto:',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        { 
+          text: 'Agregar', 
+          onPress: async (productName) => {
+            if (productName) {
+              try {
+                const newProduct = {
+                  name: productName,
+                  price: 0,
+                  stock: 0,
+                  description: '',
+                  sku: `SKU-${Math.random().toString(36).substr(2, 8)}`,
+                  categoria: 'Proteínas'
+                };
+                await createProduct(newProduct);
+                fetchProducts(); // Actualizar la lista
+                Alert.alert('Éxito', 'Producto creado correctamente');
+              } catch (error) {
+                Alert.alert('Error', 'No se pudo crear el producto');
+              }
+            }
+          }
+        }
+      ]
+    );
+  };
+
+  const handleEditProduct = (product) => {
+    Alert.prompt(
+      'Editar Producto', 
+      `Editar nombre de ${product.name}:`,
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        { 
+          text: 'Guardar', 
+          onPress: async (newName) => {
+            if (newName && newName !== product.name) {
+              try {
+                await apiUpdateProduct(product._id, { name: newName });
+                fetchProducts(); // Actualizar la lista
+                Alert.alert('Éxito', 'Producto actualizado');
+              } catch (error) {
+                Alert.alert('Error', 'No se pudo actualizar el producto');
+              }
+            }
+          }
+        }
+      ],
+      'plain-text',
+      product.name
+    );
+  };
+
+  const handleDeleteProduct = (product) => {
+    Alert.alert(
+      'Eliminar Producto',
+      `¿Está seguro de eliminar ${product.name}?`,
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Eliminar',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await apiDeleteProduct(product._id);
+              fetchProducts(); // Actualizar la lista
+              Alert.alert('Éxito', 'Producto eliminado');
+            } catch (error) {
+              Alert.alert('Error', 'No se pudo eliminar el producto');
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  const getStatusStyle = (stock) => {
+    if (stock === 0) return styles.statusOutOfStock;
+    if (stock < 10) return styles.statusLowStock;
+    return styles.statusInStock;
   };
 
   const renderItem = ({ item }) => (
     <View style={styles.tableRow}>
       <Text style={[styles.cell, styles.cellSku]}>{item.sku}</Text>
       <Text style={[styles.cell, styles.cellName]}>{item.name}</Text>
-      <Text style={[styles.cell, styles.cellCategory]}>{item.category}</Text>
+      <Text style={[styles.cell, styles.cellCategory]}>{item.categoria}</Text>
       <Text style={[styles.cell, styles.cellStock]}>{item.stock}</Text>
-      <Text style={[styles.cell, styles.cellPrice]}>{item.price}</Text>
+      <Text style={[styles.cell, styles.cellPrice]}>${item.price.toFixed(2)}</Text>
       <Text style={[styles.cell, styles.cellStatus]}>
-        <Text style={[styles.stockStatusPill, getStatusStyle(item.status)]}>
-          {item.status === 'in-stock' ? 'En Stock' : item.status === 'low-stock' ? 'Stock Bajo' : 'Agotado'}
+        <Text style={[styles.stockStatusPill, getStatusStyle(item.stock)]}>
+          {item.stock === 0 ? 'Agotado' : item.stock < 10 ? 'Stock Bajo' : 'En Stock'}
         </Text>
       </Text>
       <View style={[styles.cell, styles.cellActions]}>
-        <TouchableOpacity onPress={() => handleEditProduct(item.name)}>
+        <TouchableOpacity onPress={() => handleEditProduct(item)}>
           <MaterialCommunityIcons name="pencil-outline" size={20} color="#3498db" />
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => handleDeleteProduct(item.name)}>
+        <TouchableOpacity onPress={() => handleDeleteProduct(item)}>
           <MaterialCommunityIcons name="delete-outline" size={20} color="#e74c3c" />
         </TouchableOpacity>
       </View>
@@ -95,7 +181,7 @@ const InventoryScreen = ({ navigation }) => {
       <View style={styles.actionsBar}>
         <TouchableOpacity
           style={styles.btnPrimary}
-          onPress={() => Alert.alert('Agregar Producto', 'Funcionalidad para agregar nuevo producto')}
+          onPress={handleAddProduct}
         >
           <MaterialCommunityIcons name="plus" size={20} color="white" />
           <Text style={styles.btnPrimaryText}>Añadir Producto</Text>
@@ -145,24 +231,28 @@ const InventoryScreen = ({ navigation }) => {
         </View>
       </View>
 
-      <ScrollView horizontal>
-        <View style={styles.tableContainer}>
-          <View style={styles.tableHeaderRow}>
-            <Text style={[styles.cell, styles.cellSku]}>SKU</Text>
-            <Text style={[styles.cell, styles.cellName]}>Producto</Text>
-            <Text style={[styles.cell, styles.cellCategory]}>Categoría</Text>
-            <Text style={[styles.cell, styles.cellStock]}>Stock</Text>
-            <Text style={[styles.cell, styles.cellPrice]}>Precio</Text>
-            <Text style={[styles.cell, styles.cellStatus]}>Estado</Text>
-            <Text style={[styles.cell, styles.cellActions]}>Acciones</Text>
-          </View>
-          {products.map(product => (
-            <View key={product.sku}>
-              {renderItem({ item: product })}
+      {loading ? (
+        <Text>Cargando productos...</Text>
+      ) : (
+        <ScrollView horizontal>
+          <View style={styles.tableContainer}>
+            <View style={styles.tableHeaderRow}>
+              <Text style={[styles.cell, styles.cellSku]}>SKU</Text>
+              <Text style={[styles.cell, styles.cellName]}>Producto</Text>
+              <Text style={[styles.cell, styles.cellCategory]}>Categoría</Text>
+              <Text style={[styles.cell, styles.cellStock]}>Stock</Text>
+              <Text style={[styles.cell, styles.cellPrice]}>Precio</Text>
+              <Text style={[styles.cell, styles.cellStatus]}>Estado</Text>
+              <Text style={[styles.cell, styles.cellActions]}>Acciones</Text>
             </View>
-          ))}
-        </View>
-      </ScrollView>
+            {filteredProducts.map(product => (
+              <View key={product._id}>
+                {renderItem({ item: product })}
+              </View>
+            ))}
+          </View>
+        </ScrollView>
+      )}
     </View>
   );
 
@@ -179,6 +269,7 @@ const InventoryScreen = ({ navigation }) => {
     </SafeAreaView>
   );
 };
+
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f0f0f0' },
