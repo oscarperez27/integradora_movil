@@ -1,17 +1,13 @@
 // src/screens/ConfigurationScreen.js
-import React, { useState } from 'react';
+import React from 'react';
 import {
   View,
   Text,
   StyleSheet,
   ScrollView,
-  TouchableOpacity,
-  TextInput,
   Image,
   SafeAreaView,
-  Alert,
 } from 'react-native';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
 import CustomHeader from '../components/CustomHeader';
 
 const initialSensorsData = [
@@ -50,42 +46,12 @@ const initialSensorsData = [
 ];
 
 const ConfigurationScreen = ({ navigation }) => {
-  const [gymName, setGymName] = useState('Prime Gym Durango');
-  const [gymAddress, setGymAddress] = useState('Av. Siempre Viva 123, Col. Centro');
-  const [gymPhone, setGymPhone] = useState('618-123-4567');
-  const [gymZones, setGymZones] = useState('Zona Cardio, Área de Pesas Libres, Salón de Clases Grupales, Recepción, Vestidores');
-
-  const [sensors, setSensors] = useState(initialSensorsData);
-
-  const handleSaveGymInfo = () => {
-    Alert.alert(
-      'Guardar Información',
-      '¿Desea guardar los cambios en la información del gimnasio?',
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        { text: 'Guardar', onPress: () => console.log('Guardando info gimnasio') },
-      ]
-    );
-  };
-
-  const handleAddNewSensor = () => {
-    Alert.alert('Añadir Sensor');
-  };
-
-  const handleEditSensor = (sensorName) => {
-    Alert.alert(`Editar sensor ${sensorName}?`,);
-  };
-
-  const handleRestartSensor = (sensorName) => {
-    Alert.alert(
-      'Reiniciar Sensor',
-      `¿Está seguro de reiniciar el sensor ${sensorName}?`,
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        { text: 'Reiniciar', onPress: () => console.log('Reiniciando sensor') },
-      ]
-    );
-  };
+  // Datos estáticos (ya no cambia)
+  const gymName = 'Prime Gym Durango';
+  const gymAddress = 'Av. Siempre Viva 123, Col. Centro';
+  const gymPhone = '618-123-4567';
+  const gymZones = 'Zona Cardio, Área de Pesas Libres, Salón de Clases Grupales, Recepción, Vestidores';
+  const sensors = initialSensorsData;
 
   const getSensorStatus = (status) => {
     switch (status) {
@@ -119,30 +85,17 @@ const ConfigurationScreen = ({ navigation }) => {
             <View style={styles.formGrid}>
               <View style={styles.formGroup}>
                 <Text style={styles.label}>Nombre del Gimnasio</Text>
-                <TextInput
-                  style={styles.input}
-                  value={gymName}
-                  onChangeText={setGymName}
-                />
+                <Text style={styles.staticText}>{gymName}</Text>
               </View>
 
               <View style={styles.formGroup}>
                 <Text style={styles.label}>Dirección</Text>
-                <TextInput
-                  style={styles.input}
-                  value={gymAddress}
-                  onChangeText={setGymAddress}
-                />
+                <Text style={styles.staticText}>{gymAddress}</Text>
               </View>
 
               <View style={styles.formGroup}>
                 <Text style={styles.label}>Teléfono</Text>
-                <TextInput
-                  style={styles.input}
-                  value={gymPhone}
-                  onChangeText={setGymPhone}
-                  keyboardType="phone-pad"
-                />
+                <Text style={styles.staticText}>{gymPhone}</Text>
               </View>
 
               <View style={styles.formGroup}>
@@ -156,36 +109,13 @@ const ConfigurationScreen = ({ navigation }) => {
 
             <View style={styles.fullWidthGroup}>
               <Text style={styles.label}>Zonas del Gimnasio</Text>
-              <TextInput
-                style={styles.textarea}
-                value={gymZones}
-                onChangeText={setGymZones}
-                multiline
-                placeholder="Separar zonas por comas"
-                placeholderTextColor="#95a5a6"
-              />
+              <Text style={[styles.staticText, styles.zonesText]}>{gymZones}</Text>
             </View>
-
-            <TouchableOpacity
-              style={styles.primaryButton}
-              onPress={handleSaveGymInfo}
-            >
-              <MaterialCommunityIcons name="content-save" size={20} color="white" />
-              <Text style={styles.buttonText}>Guardar Información</Text>
-            </TouchableOpacity>
           </View>
 
           {/* Gestión de Sensores */}
           <View style={styles.settingsCard}>
             <Text style={styles.cardTitle}>Gestión de Sensores</Text>
-
-            <TouchableOpacity
-              style={styles.secondaryButton}
-              onPress={handleAddNewSensor}
-            >
-              <MaterialCommunityIcons name="plus-circle" size={20} color="white" />
-              <Text style={styles.buttonText}>Añadir Sensor</Text>
-            </TouchableOpacity>
 
             <ScrollView horizontal showsHorizontalScrollIndicator={false}>
               <View style={styles.tableContainer}>
@@ -195,7 +125,7 @@ const ConfigurationScreen = ({ navigation }) => {
                   <Text style={[styles.tableHeaderCell, styles.zoneColumn]}>Zona</Text>
                   <Text style={[styles.tableHeaderCell, styles.statusColumn]}>Estado</Text>
                   <Text style={[styles.tableHeaderCell, styles.batteryColumn]}>Batería</Text>
-                  <Text style={[styles.tableHeaderCell, styles.actionsColumn]}>Acciones</Text>
+                  <Text style={[styles.tableHeaderCell, styles.actionsColumn]}></Text>
                 </View>
 
                 {sensors.map((sensor) => {
@@ -205,18 +135,13 @@ const ConfigurationScreen = ({ navigation }) => {
                       <Text style={[styles.tableCell, styles.sensorColumn]}>{sensor.name}</Text>
                       <Text style={[styles.tableCell, styles.typeColumn]}>{sensor.type}</Text>
                       <Text style={[styles.tableCell, styles.zoneColumn]}>{sensor.zone}</Text>
-                      <View style={[styles.tableCell, styles.statusColumn]}>
+                      <View style={[styles.tableCell, styles.statusColumn, { flexDirection: 'row', alignItems: 'center' }]}>
                         <View style={[styles.statusDot, { backgroundColor: status.color }]} />
                         <Text>{status.text}</Text>
                       </View>
                       <Text style={[styles.tableCell, styles.batteryColumn]}>{sensor.battery}</Text>
                       <View style={[styles.tableCell, styles.actionsColumn]}>
-                        <TouchableOpacity onPress={() => handleEditSensor(sensor.name)}>
-                          <MaterialCommunityIcons name="pencil" size={20} color="#3498db" />
-                        </TouchableOpacity>
-                        <TouchableOpacity onPress={() => handleRestartSensor(sensor.name)}>
-                          <MaterialCommunityIcons name="restart" size={20} color="#f39c12" />
-                        </TouchableOpacity>
+                        {/* Aquí no hay botones */}
                       </View>
                     </View>
                   );
@@ -266,54 +191,27 @@ const styles = StyleSheet.create({
   formGroup: { width: '48%', marginBottom: 15 },
   fullWidthGroup: { width: '100%', marginBottom: 15 },
   label: { fontSize: 14, fontWeight: '500', color: '#4A4A4A', marginBottom: 8 },
-  input: {
-    borderWidth: 1,
-    borderColor: '#DCDCDC',
+
+  staticText: {
+    fontSize: 16,
+    color: '#333',
+    paddingVertical: 8,
+    backgroundColor: '#f8f9fa',
     borderRadius: 5,
-    padding: 12,
-    fontSize: 14,
-    backgroundColor: '#FFFFFF',
+    paddingHorizontal: 12,
   },
-  textarea: {
-    borderWidth: 1,
-    borderColor: '#DCDCDC',
-    borderRadius: 5,
-    padding: 12,
-    fontSize: 14,
-    height: 100,
+
+  zonesText: {
+    minHeight: 100,
     textAlignVertical: 'top',
-    backgroundColor: '#FFFFFF',
   },
+
   gymLogo: {
     width: 60,
     height: 60,
     borderRadius: 5,
     borderWidth: 1,
     borderColor: '#DCDCDC',
-  },
-  primaryButton: {
-    backgroundColor: '#D90429',
-    padding: 12,
-    borderRadius: 5,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 10,
-  },
-  secondaryButton: {
-    backgroundColor: '#3498db',
-    padding: 10,
-    borderRadius: 5,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 15,
-  },
-  buttonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginLeft: 8,
   },
   tableContainer: {
     borderWidth: 1,
@@ -354,13 +252,9 @@ const styles = StyleSheet.create({
   sensorColumn: { width: 180 },
   typeColumn: { width: 200 },
   zoneColumn: { width: 150 },
-  statusColumn: { width: 120, flexDirection: 'row', alignItems: 'center' },
+  statusColumn: { width: 120 },
   batteryColumn: { width: 100 },
-  actionsColumn: {
-    width: 100,
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-  },
+  actionsColumn: { width: 100 },
 });
 
 export default ConfigurationScreen;

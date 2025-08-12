@@ -45,6 +45,7 @@ const LoginScreen = ({ navigation }) => {
 
       // Guardar token en AsyncStorage
       await AsyncStorage.setItem('token', accessToken);
+      await AsyncStorage.setItem('user', JSON.stringify(user));
 
       navigation.replace('App Principal', { user });
 
@@ -92,7 +93,7 @@ const LoginScreen = ({ navigation }) => {
 
           <CustomButton title="Iniciar Sesión" onPress={handleLogin} />
 
-          <TouchableOpacity onPress={() => console.log('Olvidé mi contraseña')} style={styles.forgotPasswordButton}>
+          <TouchableOpacity onPress={() => navigation.navigate('ForgotPassword')} style={styles.forgotPasswordButton}>
             <Text style={styles.forgotPasswordLink}>¿Olvidaste tu contraseña?</Text>
           </TouchableOpacity>
         </View>

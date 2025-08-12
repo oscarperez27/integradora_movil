@@ -1,5 +1,5 @@
 // src/screens/AdminProfileScreen.js
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -8,23 +8,103 @@ import {
   Alert,
   TouchableOpacity,
   SafeAreaView,
+  ActivityIndicator,
 } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { API } from '../api/apiConfig'; // Asegúrate de tener tu URL de API configurada
 
 const AdminProfileScreen = ({ navigation }) => {
-  const [adminName, setAdminName] = useState('Usuario Admin');
-  const [adminEmail, setAdminEmail] = useState('admin@primegym.com');
+  const [adminName, setAdminName] = useState('');
+  const [adminFirstName, setAdminFirstName] = useState('');
+  const [adminLastName, setAdminLastName] = useState('');
+  const [adminEmail, setAdminEmail] = useState('');
   const [adminPassword, setAdminPassword] = useState('');
   const [adminPasswordConfirm, setAdminPasswordConfirm] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [userData, setUserData] = useState(null);
 
-  const handleSaveProfile = () => {
-    if (adminPassword !== adminPasswordConfirm) {
+  useEffect(() => {
+    const loadUserInfo = async () => {
+      try {
+        const storedUser = await AsyncStorage.getItem('user');
+        if (!storedUser) {
+          Alert.alert('Error', 'No se encontró la sesión del usuario');
+          return;
+        }
+        const user = JSON.parse(storedUser);
+        setUserData(user);
+        setAdminName(user.username || '');
+        setAdminFirstName(user.firstName || '');
+        setAdminLastName(user.lastName || '');
+        setAdminEmail(user.email || '');
+      } catch (error) {
+        console.error('Error cargando info del usuario', error);
+      }
+    };
+
+    loadUserInfo();
+  }, []);
+
+  const handleSaveProfile = async () => {
+    if (adminPassword && adminPassword !== adminPasswordConfirm) {
       Alert.alert('Error', 'Las contraseñas no coinciden');
       return;
     }
 
-    Alert.alert('Guardar Perfil', 'Perfil actualizado correctamente');
+    try {
+      setLoading(true);
+      const token = await AsyncStorage.getItem('token');
+
+      const res = await fetch(`${API}/api/auth/users/me`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          username: adminName,
+          email: adminEmail,
+          ...(adminPassword && {
+            password: adminPassword,
+            confirmPassword: adminPasswordConfirm,
+          }),
+        }),
+      });
+
+      const data = await res.json();
+      setLoading(false);
+
+      if (!res.ok) {
+        Alert.alert('Error', data.message || 'No se pudo actualizar el perfil');
+        return;
+      }
+
+      // Actualizar localStorage
+      const updatedUser = {
+        ...userData,
+        username: adminName,
+        email: adminEmail,
+      };
+      await AsyncStorage.setItem('user', JSON.stringify(updatedUser));
+
+      Alert.alert('Éxito', 'Perfil actualizado correctamente');
+      setAdminPassword('');
+      setAdminPasswordConfirm('');
+    } catch (error) {
+      console.error('Error al actualizar perfil', error);
+      Alert.alert('Error', 'Error de red o del servidor');
+      setLoading(false);
+    }
   };
+
+  if (!userData) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <ActivityIndicator size="large" color="#D90429" />
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -61,8 +141,14 @@ const AdminProfileScreen = ({ navigation }) => {
         />
 
         <TouchableOpacity style={styles.saveButton} onPress={handleSaveProfile}>
-          <MaterialCommunityIcons name="content-save" size={20} color="white" />
-          <Text style={styles.saveButtonText}>Guardar Perfil</Text>
+          {loading ? (
+            <ActivityIndicator color="white" />
+          ) : (
+            <>
+              <MaterialCommunityIcons name="content-save" size={20} color="white" />
+              <Text style={styles.saveButtonText}>Guardar Perfil</Text>
+            </>
+          )}
         </TouchableOpacity>
       </View>
     </SafeAreaView>

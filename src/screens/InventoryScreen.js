@@ -13,6 +13,9 @@ import {
 import { Picker } from '@react-native-picker/picker';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import CustomHeader from '../components/CustomHeader';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import Modal from 'react-native-modal';
+import { API } from '../api/apiConfig'; // Usa tu IP local
 
 const InventoryScreen = ({ navigation }) => {
   const [products, setProducts] = useState([]);
@@ -20,99 +23,170 @@ const InventoryScreen = ({ navigation }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterCategory, setFilterCategory] = useState('');
   const [filterStockStatus, setFilterStockStatus] = useState('');
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [editingProductId, setEditingProductId] = useState(null);
+  const [newProductData, setNewProductData] = useState({
+  name: '',
+  price: '',
+  stock: '',
+  sku: '',
+  categoria: 'Proteínas',
+  description: '',
+});
 
-  // Cargar productos al montar el componente
-  useEffect(() => {
-    fetchProducts();
-  }, []);
-
-  const fetchProducts = async () => {
+    const fetchProducts = async () => {
+    setLoading(true);
     try {
-      setLoading(true);
-      const productsData = await getProducts();
-      setProducts(productsData);
+      const token = await AsyncStorage.getItem("token");
+      const response = await fetch(`${API}/api/product/products`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const data = await response.json();
+
+      if (Array.isArray(data)) {
+        setProducts(data);
+      } else if (Array.isArray(data.products)) {
+        setProducts(data.products);
+      } else {
+        console.error("La respuesta no es un array:", data);
+        setProducts([]);
+      }
     } catch (error) {
-      Alert.alert("Error", "No se pudieron cargar los productos");
-      console.error("Error fetching products:", error);
+      console.error("Error al obtener productos:", error);
+      setProducts([]);
     } finally {
       setLoading(false);
     }
   };
 
-  // Filtrar productos basado en búsqueda y filtros
+  // Solo llama fetchProducts en useEffect la primera vez
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
+  const createProduct = async (product) => {
+    const token = await AsyncStorage.getItem("token"); // 👈 Asegúrate de tener el token
+    const res = await fetch(`${API}/api/product/create`, {
+      method: 'POST',
+      headers: { 
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}` // 👈 Agregar esto
+      },
+      body: JSON.stringify(product),
+    });
+    if (!res.ok) throw new Error('Error al crear producto');
+    return await res.json();
+  };
+
+  const apiUpdateProduct = async (id, updates) => {
+    const token = await AsyncStorage.getItem("token");
+    const res = await fetch(`${API}/api/product/product/${id}`, {
+      method: 'PUT',
+      headers: { 
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}` // 👈 Aquí también
+      },
+      body: JSON.stringify(updates),
+    });
+    if (!res.ok) throw new Error('Error al actualizar producto');
+    return await res.json();
+  };
+
+  const apiDeleteProduct = async (id) => {
+    const token = await AsyncStorage.getItem("token");
+    const res = await fetch(`${API}/api/product/product/delete/${id}`, {
+      method: 'PATCH', // 👈 Usas PATCH, no DELETE
+      headers: {
+        Authorization: `Bearer ${token}`, // 👈 Aquí también
+      },
+    });
+    if (!res.ok) throw new Error('Error al eliminar producto');
+    return await res.json();
+  };
+
   const filteredProducts = products.filter(product => {
     const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         product.sku.toLowerCase().includes(searchQuery.toLowerCase());
+      product.sku.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory = !filterCategory || product.categoria === filterCategory;
-    
-    // Determinar estado de stock
+
     let status = '';
     if (product.stock === 0) status = 'out-of-stock';
     else if (product.stock < 10) status = 'low-stock';
     else status = 'in-stock';
-    
+
     const matchesStockStatus = !filterStockStatus || status === filterStockStatus;
-    
     return matchesSearch && matchesCategory && matchesStockStatus;
   });
 
   const handleAddProduct = () => {
-    // Aquí puedes implementar un modal o navegar a una pantalla de creación
-    Alert.prompt(
-      'Agregar Producto',
-      'Ingrese el nombre del nuevo producto:',
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        { 
-          text: 'Agregar', 
-          onPress: async (productName) => {
-            if (productName) {
-              try {
-                const newProduct = {
-                  name: productName,
-                  price: 0,
-                  stock: 0,
-                  description: '',
-                  sku: `SKU-${Math.random().toString(36).substr(2, 8)}`,
-                  categoria: 'Proteínas'
-                };
-                await createProduct(newProduct);
-                fetchProducts(); // Actualizar la lista
-                Alert.alert('Éxito', 'Producto creado correctamente');
-              } catch (error) {
-                Alert.alert('Error', 'No se pudo crear el producto');
-              }
-            }
-          }
-        }
-      ]
-    );
+    setNewProductData({
+      name: '',
+      price: '',
+      stock: '',
+      sku: `SKU-${Math.random().toString(36).substr(2, 8).toUpperCase()}`,
+      categoria: 'Proteínas',
+      description: '',
+    });
+    setEditingProductId(null);
+    setShowAddModal(true);
+  };
+
+    const handleSaveProduct = async () => {
+    const { name, price, stock, sku, categoria, description } = newProductData;
+
+    if (!name || !price || !stock || !sku || !categoria || !description) {
+      Alert.alert('Error', 'Todos los campos son obligatorios');
+      return;
+    }
+
+    try {
+      if (editingProductId) {
+        // Actualizar
+        await apiUpdateProduct(editingProductId, {
+          name,
+          price: parseFloat(price),
+          stock: parseInt(stock),
+          sku,
+          categoria,
+          description,
+          status: true,
+        });
+        Alert.alert('Éxito', 'Producto actualizado correctamente');
+      } else {
+        // Crear
+        await createProduct({
+          name,
+          price: parseFloat(price),
+          stock: parseInt(stock),
+          sku,
+          categoria,
+          description,
+          status: true,
+        });
+        Alert.alert('Éxito', 'Producto agregado correctamente');
+      }
+
+      setShowAddModal(false);
+      setEditingProductId(null);
+      await fetchProducts();
+    } catch (error) {
+      Alert.alert('Error', 'No se pudo guardar el producto');
+    }
   };
 
   const handleEditProduct = (product) => {
-    Alert.prompt(
-      'Editar Producto', 
-      `Editar nombre de ${product.name}:`,
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        { 
-          text: 'Guardar', 
-          onPress: async (newName) => {
-            if (newName && newName !== product.name) {
-              try {
-                await apiUpdateProduct(product._id, { name: newName });
-                fetchProducts(); // Actualizar la lista
-                Alert.alert('Éxito', 'Producto actualizado');
-              } catch (error) {
-                Alert.alert('Error', 'No se pudo actualizar el producto');
-              }
-            }
-          }
-        }
-      ],
-      'plain-text',
-      product.name
-    );
+    setNewProductData({
+      name: product.name,
+      price: product.price.toString(),
+      stock: product.stock.toString(),
+      sku: product.sku,
+      categoria: product.categoria,
+      description: product.description,
+    });
+    setEditingProductId(product._id);
+    setShowAddModal(true);
   };
 
   const handleDeleteProduct = (product) => {
@@ -127,7 +201,7 @@ const InventoryScreen = ({ navigation }) => {
           onPress: async () => {
             try {
               await apiDeleteProduct(product._id);
-              fetchProducts(); // Actualizar la lista
+              fetchProducts();
               Alert.alert('Éxito', 'Producto eliminado');
             } catch (error) {
               Alert.alert('Error', 'No se pudo eliminar el producto');
@@ -173,10 +247,7 @@ const InventoryScreen = ({ navigation }) => {
       <Text style={styles.pageSubtitle}>Suplementos y Productos</Text>
 
       <View style={styles.actionsBar}>
-        <TouchableOpacity
-          style={styles.btnPrimary}
-          onPress={handleAddProduct}
-        >
+        <TouchableOpacity style={styles.btnPrimary} onPress={handleAddProduct}>
           <MaterialCommunityIcons name="plus" size={20} color="white" />
           <Text style={styles.btnPrimaryText}>Añadir Producto</Text>
         </TouchableOpacity>
@@ -195,12 +266,7 @@ const InventoryScreen = ({ navigation }) => {
         </View>
 
         <View style={styles.filterGroup}>
-          <Picker
-            selectedValue={filterCategory}
-            onValueChange={setFilterCategory}
-            style={styles.picker}
-            dropdownIconColor="#7f8c8d"
-          >
+          <Picker selectedValue={filterCategory} onValueChange={setFilterCategory} style={styles.picker} dropdownIconColor="#7f8c8d">
             <Picker.Item label="Todas las categorías" value="" />
             <Picker.Item label="Proteínas" value="Proteínas" />
             <Picker.Item label="Creatinas" value="Creatinas" />
@@ -211,12 +277,7 @@ const InventoryScreen = ({ navigation }) => {
         </View>
 
         <View style={styles.filterGroup}>
-          <Picker
-            selectedValue={filterStockStatus}
-            onValueChange={setFilterStockStatus}
-            style={styles.picker}
-            dropdownIconColor="#7f8c8d"
-          >
+          <Picker selectedValue={filterStockStatus} onValueChange={setFilterStockStatus} style={styles.picker} dropdownIconColor="#7f8c8d">
             <Picker.Item label="Todos los estados" value="" />
             <Picker.Item label="En Stock" value="in-stock" />
             <Picker.Item label="Stock Bajo" value="low-stock" />
@@ -240,9 +301,7 @@ const InventoryScreen = ({ navigation }) => {
               <Text style={[styles.cell, styles.cellActions]}>Acciones</Text>
             </View>
             {filteredProducts.map(product => (
-              <View key={product._id}>
-                {renderItem({ item: product })}
-              </View>
+              <View key={product._id}>{renderItem({ item: product })}</View>
             ))}
           </View>
         </ScrollView>
@@ -260,10 +319,57 @@ const InventoryScreen = ({ navigation }) => {
         keyExtractor={() => Math.random().toString()}
         contentContainerStyle={styles.flatListContent}
       />
+       <Modal isVisible={showAddModal} onBackdropPress={() => { setShowAddModal(false); setEditingProductId(null); }}>
+    <View style={{ backgroundColor: 'white', borderRadius: 10, padding: 20 }}>
+      <Text style={{ fontSize: 18, fontWeight: 'bold', marginBottom: 10 }}>
+        {editingProductId ? 'Editar Producto' : 'Nuevo Producto'}
+      </Text>
+      
+      {['name', 'price', 'stock', 'sku', 'description'].map(field => (
+        <TextInput
+          key={field}
+          placeholder={field.charAt(0).toUpperCase() + field.slice(1)}
+          value={newProductData[field]}
+          onChangeText={(text) =>
+            setNewProductData({ ...newProductData, [field]: text })
+          }
+          keyboardType={field === 'price' || field === 'stock' ? 'numeric' : 'default'}
+          style={{
+            borderBottomWidth: 1,
+            borderBottomColor: '#ccc',
+            marginBottom: 10,
+            paddingVertical: 8,
+          }}
+        />
+      ))}
+
+      <Picker
+        selectedValue={newProductData.categoria}
+        onValueChange={(value) =>
+          setNewProductData({ ...newProductData, categoria: value })
+        }
+        style={{ marginBottom: 20 }}
+      >
+        <Picker.Item label="Proteínas" value="Proteínas" />
+        <Picker.Item label="Creatinas" value="Creatinas" />
+        <Picker.Item label="Pre-Entrenos" value="Pre-Entrenos" />
+        <Picker.Item label="Ropa" value="Ropa" />
+        <Picker.Item label="Accesorios" value="Accesorios" />
+      </Picker>
+
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+        <TouchableOpacity onPress={() => { setShowAddModal(false); setEditingProductId(null); }} style={{ padding: 10 }}>
+          <Text style={{ color: '#e74c3c' }}>Cancelar</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={handleSaveProduct} style={{ padding: 10 }}>
+          <Text style={{ color: '#27ae60' }}>Guardar</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  </Modal>
     </SafeAreaView>
   );
 };
-
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f0f0f0' },

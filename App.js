@@ -24,9 +24,20 @@ import ConfigurationScreen from './src/screens/ConfigurationScreen';
 import AdminProfileScreen from './src/screens/AdminProfileScreen';
 import OrderScreen from './src/screens/OrderScreen';
 import EmployeScreen from './src/screens/EmployeScreen';
+import ViewPDFScreen from './src/screens/ViewPDFScreen';
+import ForgotPasswordScreen from './src/screens/ForgotPasswordScreen';
+import ResetPasswordScreen from './src/screens/ResetPasswordScreen';
 
 const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
+const linking = {
+  prefixes: ['primegym://'],
+  config: {
+    screens: {
+      ResetPassword: 'reset-password',
+    },
+  },
+};
 
 // Contenido personalizado del drawer
 const CustomDrawerContent = (props) => {
@@ -123,6 +134,20 @@ const CustomDrawerContent = (props) => {
   );
 };
 
+const ADMIN_ROLE_IDS = ['68703a8cbe19d4a7e175ea1a'];
+
+const DrawerNavigatorWrapper = ({ route }) => {
+  const user = route?.params?.user;
+  const userRoles = user?.roles || [];
+
+  // Si alguno de los roles es admin
+  const isAdmin = userRoles.some(roleId => ADMIN_ROLE_IDS.includes(roleId));
+
+  const userRole = isAdmin ? 'admin' : 'user';
+
+  return <DrawerNavigator userRole={userRole} />;
+};
+
 // Drawer Navigator principal con control de roles
 const DrawerNavigator = ({ userRole }) => {
   return (
@@ -133,7 +158,7 @@ const DrawerNavigator = ({ userRole }) => {
         headerShown: false,
         drawerStyle: {
           backgroundColor: '#2c3e50',
-          width: 240,
+          width: 200,
         },
       }}
     >
@@ -218,24 +243,8 @@ const DrawerNavigator = ({ userRole }) => {
 
 // Navegador raíz con estado simulado de rol
 export default function App() {
-  const [userRole, setUserRole] = useState(null);
-
-  useEffect(() => {
-    // Simula obtener el rol real (reemplaza con tu lógica)
-    const roleFromLogin = "admin"; // o "user", etc.
-    setUserRole(roleFromLogin);
-  }, []);
-
-  if (userRole === null) {
-    return (
-      <View style={{ flex:1, justifyContent:'center', alignItems:'center' }}>
-        <Text>Cargando...</Text>
-      </View>
-    );
-  }
-
   return (
-    <NavigationContainer>
+    <NavigationContainer linking={linking}>
       <Stack.Navigator initialRouteName="Login">
         <Stack.Screen
           name="Login"
@@ -244,12 +253,25 @@ export default function App() {
         />
         <Stack.Screen
           name="App Principal"
-          children={() => <DrawerNavigator userRole={userRole} />}
+          component={DrawerNavigatorWrapper}
           options={{ headerShown: false }}
         />
         <Stack.Screen 
           name="Perfil" 
           component={AdminProfileScreen} 
+        />
+        <Stack.Screen 
+          name="ViewPDF" 
+          component={ViewPDFScreen} 
+          options={{ title: 'Visualizador de Reporte' }}
+        />
+        <Stack.Screen 
+          name="ForgotPassword" 
+          component={ForgotPasswordScreen}
+        />
+        <Stack.Screen 
+          name="ResetPassword" 
+          component={ResetPasswordScreen} 
         />
       </Stack.Navigator>
     </NavigationContainer>

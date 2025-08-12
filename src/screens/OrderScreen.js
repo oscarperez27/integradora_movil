@@ -80,7 +80,7 @@ const Orders = ({ navigation }) => {
 
   const getUserNameById = (id) => {
     const user = users.find((u) => u._id === id);
-    return user ? `${user.firstName || user.username || 'Usuario'}` : 'Desconocido';
+    return user ? (user.firstName || 'Usuario') : 'Desconocido';
   };
 
   const handleSearch = (term) => {
@@ -329,7 +329,7 @@ const Orders = ({ navigation }) => {
     selectedValue={p.sku}
     onValueChange={(value) => handleNewProductChange(i, 'sku', value)}
   >
-    <Picker.Item label="Selecciona un producto" value="" />
+    
     {products.map((prod) => (
       <Picker.Item key={prod.sku} label={prod.name} value={prod.sku} />
     ))}
